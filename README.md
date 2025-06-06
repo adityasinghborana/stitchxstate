@@ -20,17 +20,39 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## To connect database with prisma 
+make .env and add this code below with your database name and sql username and password 
 
-To learn more about Next.js, take a look at the following resources:
+DATABASE_URL="mysql://user:password@localhost:3306/clothing_store
+## To sync/update database with prisma schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+you can run these commands 
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+```bash
+npx prisma generate 
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#and
+npx prisma migrate dev  
+```
+and then the name of the migration and make sure it is not used before 
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Clean Architecture pattern used in this project 
+
+#this is complete Architecture pattern but for simplicity we removed infrastructer folder and implemeted repo in the same file as repository
+
+
+
+src/
+├── app/
+│   └── api/
+│       └── products/
+│           └── route.ts            // Layer 4: Frameworks & Drivers (The Controller)
+├── core/
+   ├── entities/
+   │   └── product.entity.ts       // Layer 1: Entities/ interface class /models(Business Objects)
+   ├── repositories/
+   │   └── IProductRepository.ts   // Layer 2: Repositiory (The abstraction/interface) and The implementation
+   └── use-cases/
+     └── GetAllProducts.usecase.ts // Layer 3: Use Case (The business logic)
+

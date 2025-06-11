@@ -8,6 +8,7 @@ export interface ProductImageEntity {
 export interface ProductCategoryEntity {
   id: string;
   name: string;
+  imageUrl?: string;
 }
 
 export interface ProductVariationEntity {

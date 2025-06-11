@@ -67,6 +67,13 @@ model Category {
   name      String    @unique
   products  Product[] @relation("ProductToCategory")
   createdAt DateTime  @default(now())
+  images    CategoryImage[]
+}
+model CategoryImage {
+  id         String   @id @default(uuid())
+  url        String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
 model Order {

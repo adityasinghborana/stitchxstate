@@ -8,7 +8,6 @@ import { GetUserByIdUseCase } from '@/core/usecases/GetUserById.usecase';
 const userRepository = new PrismaUserRepository();
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
 const createUserUseCase = new CreateUserUseCase(userRepository);
-const getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
 
 export async function GET() {
   try {

@@ -26,3 +26,23 @@ export interface userResponseDto {
     updatedAt:Date;
     isAdmin:boolean;
 }
+
+export interface RequestOtpDto{
+    email:string;
+}
+
+export interface VerifyOtpDto{
+    email:string;
+    otp:string;
+}
+
+export interface LoginResponseDto {
+    token:string;
+    user:{
+        id:string,
+        firstName:string,
+        lastName:string,
+        email:string,
+        isAdmin:boolean
+    }
+}

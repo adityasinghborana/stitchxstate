@@ -16,15 +16,17 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  firstName String
-  lastName  String
+  firstName String?
+  lastName  String?
   email     String   @unique
-  password  String
+  password  String?
   phone     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
   isAdmin   Boolean  @default(false)
+  otp       String?
+  otpExpiresAt DateTime?
 }
 
 model Product {

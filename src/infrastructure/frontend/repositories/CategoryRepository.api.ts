@@ -4,10 +4,10 @@ import { CreateCategoryDTO, UpdateCategoryDTO } from "@/core/dtos/CreateCategory
 
 export class CategoryApiRepository implements ICategoryRepository{
     async findAll(): Promise<CategoryEntity[]> {
-        const response = await fetch('/api/category')
+        const response = await fetch('http://localhost:3000/api/category')
         if(!response.ok){
             const errorData = await  response.json();
-            throw new Error(errorData.message || 'failed to fetch category data from api ')
+            throw new Error(errorData.message )
         }
         const data= await response.json();
         return data;

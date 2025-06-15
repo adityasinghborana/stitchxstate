@@ -1,23 +1,21 @@
 import { ICategoryRepository } from "../repositories/ICategoryRepository";
-import { CreateCategoryDTO } from "../dtos/CreateCategory.dto";
+import {  UpdateCategoryDTO } from "../dtos/CreateCategory.dto";
 import { CategoryEntity } from "../entities/category.entity";
 
 export class UpdateCategoryUseCase{
     constructor(private categoryRepository:ICategoryRepository){}
-    async execute(id:string,categoryData:CreateCategoryDTO):Promise<CategoryEntity>{
-         if (Object.keys(categoryData).length === 0) {
-        throw { message: 'No data provided for category update.', code: 'NO_UPDATE_DATA' };
-        }
-        try {
-            const existingCategory = await this.categoryRepository.findById(id);
-            if (!existingCategory) {
-                throw { message: 'Category not found for update.', code: 'NOT_FOUND' };
-            }
-            const updatedCategory = await this.categoryRepository.update(id,categoryData);
-            return updatedCategory;
-        } catch (error) {
-            console.error(`Error in CategoryUseCases.updateCategory for ID ${id}:`, error);
-            throw error;
-        }
+    async execute(id:string,data:UpdateCategoryDTO):Promise<CategoryEntity>{
+         if (!id) {
+      throw new Error('Category ID is required for update.');
     }
+    if (data.name !== undefined && data.name.trim() === '') {
+      throw new Error('Category name cannot be empty.');
+    }
+    // imageUrl is now a simple string
+    if (data.imageUrl !== undefined && typeof data.imageUrl !== 'string') {
+        throw new Error('Image URL must be a string.');
+    }
+
+    return this.categoryRepository.update(id, data);
+  }
 }

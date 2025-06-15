@@ -26,7 +26,6 @@ export function CreateProductForm() {
       categoryIds: ['1'],
       variations: [{ size: 'S', color: 'Black', price: 999.99, stock: 100, images: [] }],
     };
-
     try {
       // The logic for calling the API remains the same
       const productRepository = new ProductApiRepository();

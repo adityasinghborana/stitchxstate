@@ -19,7 +19,7 @@ const CategoryPromoSection = () => {
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white  bg-opacity-30">
                 <h1 className="text-3xl md:text-5xl font-light mb-2 tracking-wide">NEW ARRIVAL</h1>
                 <h1 className="text-3xl md:text-5xl font-serif mb-2 tracking-wide">DENIM</h1>
-                <Button className=' rounded-none bg-[#021826]'>EXPLORE COLLECTION</Button>
+                <Button className=' rounded-none bg-[#021826] '>EXPLORE COLLECTION</Button>
             </div>
         </div>
 

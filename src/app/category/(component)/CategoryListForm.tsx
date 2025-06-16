@@ -23,7 +23,7 @@ const CategoryListForm = ({ categories }: CategoryListFormProps) => {
       {categories.map((category) => (
         <Link
           key={category.id}
-          href={`/categories/${category.id}`}
+          href={`/category/${category.id}`}
           className="block group"
         >
           <div className="relative overflow-hidden  shadow-md hover:shadow-lg transition-shadow duration-300 transform group-hover:scale-105">

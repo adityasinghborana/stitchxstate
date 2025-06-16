@@ -1,8 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
- images: {
-    domains: ['placehold.co'],
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: [
+      'placehold.co',
+      'example.com' 
+    ],
   },
 };
 

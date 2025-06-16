@@ -67,7 +67,7 @@ const Header = () => {
         <div className="hidden md:flex flex-grow justify-center space-x-8 text-gray-700 font-medium text-sm">
           <Link href="#" className="hover:text-blue-600 transition-colors duration-200">SHOP</Link>
           <Link href="#" className="hover:text-blue-600 transition-colors duration-200">SEASON</Link>
-          <Link href="#" className="font-bold text-gray-900 text-xl whitespace-nowrap">STITCH X STATE</Link>
+          <Link href="/" className="font-bold text-gray-900 text-xl whitespace-nowrap">STITCH X STATE</Link>
           <Link href="#" className="hover:text-blue-600 transition-colors duration-200">JOURNAL</Link>
           <Link href="#" className="hover:text-blue-600 transition-colors duration-200">THEME FEATURES</Link>
         </div>

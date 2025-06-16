@@ -1,5 +1,5 @@
 
-
+import { CategoryEntity } from "./category.entity";
 export interface ProductImageEntity {
   id: string;
   url: string;
@@ -25,5 +25,5 @@ export interface ProductEntity {
   name: string;
   description: string;
   variations: ProductVariationEntity[];
-  categories: ProductCategoryEntity[];
+  categories: CategoryEntity[];
 }

@@ -71,6 +71,15 @@ export class ProductApiRepository implements IProductRepository {
             const data = await response.json();
             return data;
   }
+  async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
+      const response= await fetch(`/api/category/${categoryId}/products`);
+      if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch user by ID from the API.');
+      }
+      const data = await response.json();
+      return data;
+  }
   async update(id: string, productData: CreateProductDTO): Promise<ProductEntity> {
       const response = await fetch(`/api/products/${id}`, {
               method: 'PUT',

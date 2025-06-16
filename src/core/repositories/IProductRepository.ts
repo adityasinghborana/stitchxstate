@@ -9,6 +9,7 @@ export interface IProductRepository {
   findById(id:string):Promise<ProductEntity |null>;
   update(id: string, productData: CreateProductDTO): Promise<ProductEntity>;
   delete(id: string): Promise<ProductEntity>;
+  findByCategoryId(categoryId: string): Promise<ProductEntity[]>;
 }
 
 export class ProductRepository implements IProductRepository {
@@ -33,13 +34,42 @@ export class ProductRepository implements IProductRepository {
 
 async findById(id: string): Promise<ProductEntity | null> {
     const product = await prisma.product.findUnique({
-        where: { id },
-      
+      where: { id },
+      include: { 
+        variations: {
+          include: {
+            images: true,
+          },
+        },
+        categories: true,
+      },
     });
     console.log(`ProductRepository.findById result for ${id}:`, product ? 'Found' : 'Not Found', product);
     return product as ProductEntity |null;
 }
-  
+async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
+    const products = await prisma.product.findMany({
+      where: {
+        categories: {
+          some: { // 'some' is used for many-to-many relationships
+            id: categoryId,
+          },
+        },
+      },
+      include: {
+        categories: true, // Include categories if your ProductEntity needs them
+        variations: {
+          include: {
+            images: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc', 
+      },
+    });
+    return products as ProductEntity[];
+  }
   async create(productData: CreateProductDTO): Promise<ProductEntity> {
     const { name, description, categoryIds, variations } = productData;
     const createData: any = { 

@@ -1,0 +1,42 @@
+// src/app/api/category/[categoryId]/products/route.ts
+
+import { NextResponse } from "next/server";
+// Make sure to import the CONCRETE ProductRepository, not the interface
+import { ProductRepository } from "@/core/repositories/IProductRepository";
+import { GetProductsByCategoryUseCase } from "@/core/usecases/getProductByCategoryId";
+
+// Initialize repository and use case outside the handler for performance
+// This ensures they are only instantiated once per server instance (or per cold start)
+const productRepository = new ProductRepository();
+const getProductsByCategoryUseCase = new GetProductsByCategoryUseCase(productRepository);
+
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } } // Corrected params type for direct access
+) {
+    try {
+        const { id } = params; // Access categoryId directly
+
+        if (!id) {
+            return NextResponse.json({ message: 'Missing category ID in request' }, { status: 400 });
+        }
+
+        const products = await getProductsByCategoryUseCase.execute(id);
+
+        // It's possible for a category to exist but have no products.
+        // Returning an empty array with 200 status is generally preferred
+        // over 404 for "no results found" in a collection.
+        return NextResponse.json(products, { status: 200 });
+
+    } catch (error: any) {
+        console.error('Error fetching products by category ID:', error);
+        // Provide a more specific error message than "failed to fetch user"
+        return NextResponse.json(
+            { message: "Failed to fetch products for category", error: error.message },
+            { status: 500 }
+        );
+    }
+}
+
+// Optional: Add more specific revalidation if needed
+// export const revalidate = 0; // Disable caching for this route for development, or set a time like 60;

@@ -10,9 +10,9 @@ interface CreateProductVariationDTO {
 }
 
 export interface CreateProductDTO {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   // We expect category IDs to be provided for linking
-  categoryIds: string[]; 
-  variations: CreateProductVariationDTO[];
+  categoryIds?: string[]; 
+  variations?: CreateProductVariationDTO[];
 }

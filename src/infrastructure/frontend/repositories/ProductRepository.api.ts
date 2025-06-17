@@ -61,4 +61,52 @@ export class ProductApiRepository implements IProductRepository {
     const data = await response.json();
     return data;
   }
+  async findById(id: string): Promise<ProductEntity | null> {
+       const response = await fetch(`/api/products/${id}`);
+            if (!response.ok) {
+              if (response.status === 404) return null;
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Failed to fetch user by ID from the API.');
+            }
+            const data = await response.json();
+            return data;
+  }
+  async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
+      const response= await fetch(`/api/category/${categoryId}/products`);
+      if(!response.ok){
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch user by ID from the API.');
+      }
+      const data = await response.json();
+      return data;
+  }
+  async update(id: string, productData: CreateProductDTO): Promise<ProductEntity> {
+      const response = await fetch(`/api/products/${id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(productData),
+            });
+        
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Failed to update user.');
+            }
+            const updated= await response.json();
+            return updated;
+  }
+  async delete(id: string): Promise<ProductEntity> {
+       const response = await fetch(`/api/category/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to delete user.');
+    }
+     const deletedProduct: ProductEntity = await response.json();
+    return deletedProduct;
+  }
 }
+

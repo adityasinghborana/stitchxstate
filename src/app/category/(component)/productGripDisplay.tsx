@@ -46,7 +46,7 @@ export default function ProductGridDisplay({ products }: ProductGridDisplayProps
         return (
           <Link
             key={product.id}
-            href={`/product/${product.id}`} 
+            href={`/products/${product.id}`} 
             className="block group relative bg-white rounded-lg  overflow-hidden hover:shadow-xl transition-shadow duration-300"
           >
             <div className="relative w-full h-80 bg-gray-100 flex items-center justify-center overflow-hidden">

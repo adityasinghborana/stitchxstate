@@ -14,5 +14,5 @@ export interface CreateProductDTO {
   description?: string;
   // We expect category IDs to be provided for linking
   categoryIds?: string[]; 
-  variations?: CreateProductVariationDTO[];
+  variations?: CreateProductVariationDTO[] |null;
 }

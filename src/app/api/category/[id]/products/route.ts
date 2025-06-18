@@ -10,10 +10,8 @@ import { GetProductsByCategoryUseCase } from "@/core/usecases/getProductByCatego
 const productRepository = new ProductRepository();
 const getProductsByCategoryUseCase = new GetProductsByCategoryUseCase(productRepository);
 
-export async function GET(
-    request: Request,
-    { params }: { params: { id: string } } // Corrected params type for direct access
-) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const { id } = params; // Access categoryId directly
 

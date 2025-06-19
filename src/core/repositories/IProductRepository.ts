@@ -1,8 +1,8 @@
+// core/repositories/ProductRepository.ts
 import { CreateProductDTO } from "../dtos/CreateProduct.dto";
 import { ProductEntity } from "../entities/product.entity";
 import prisma from "@/lib/prisma";
-// This is the contract our use case will depend on.
-// It dictates the methods that any product repository must implement.
+
 export interface IProductRepository {
   findAll(): Promise<ProductEntity[]>;
   create(productData: CreateProductDTO): Promise<ProductEntity>;
@@ -14,7 +14,6 @@ export interface IProductRepository {
 
 export class ProductRepository implements IProductRepository {
   
-  // The method from our interface is implemented here using Prisma.
   async findAll(): Promise<ProductEntity[]> {
     const products = await prisma.product.findMany({
       include: {
@@ -24,15 +23,13 @@ export class ProductRepository implements IProductRepository {
           },
         },
         categories: true,
+        galleryImages: true, // Correctly included
       },
     });
+    return products as ProductEntity[];
+  }
 
-    // The data structure from Prisma happens to match our ProductEntity perfectly.
-    // If it didn't, you would map the Prisma model to your entity here.
-    return products;
-  } 
-
-async findById(id: string): Promise<ProductEntity | null> {
+  async findById(id: string): Promise<ProductEntity | null> {
     const product = await prisma.product.findUnique({
       where: { id },
       include: { 
@@ -42,27 +39,30 @@ async findById(id: string): Promise<ProductEntity | null> {
           },
         },
         categories: true,
+        galleryImages: true, // Correctly included
       },
     });
     console.log(`ProductRepository.findById result for ${id}:`, product ? 'Found' : 'Not Found', product);
-    return product as ProductEntity |null;
-}
-async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
+    return product as ProductEntity | null;
+  }
+
+  async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
     const products = await prisma.product.findMany({
       where: {
         categories: {
-          some: { // 'some' is used for many-to-many relationships
+          some: {
             id: categoryId,
           },
         },
       },
-      include: {
-        categories: true, // Include categories if your ProductEntity needs them
+      include: { // Moved galleryImages into include
+        categories: true,
         variations: {
           include: {
             images: true,
           },
         },
+        galleryImages: true, // Correctly placed inside include
       },
       orderBy: {
         createdAt: 'desc', 
@@ -70,33 +70,46 @@ async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
     });
     return products as ProductEntity[];
   }
+
   async create(productData: CreateProductDTO): Promise<ProductEntity> {
-    const { name, description, categoryIds, variations } = productData;
-    const createData: any = { 
+    // Destructure all new fields
+    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages } = productData;
+    
+    const createData: any = { // Consider using Prisma.ProductCreateInput for better type safety
         name,
         description,
+        ...(thumbnailVideo !== undefined && thumbnailVideo !== null && { thumbnailVideo }), // Handle null for thumbnailVideo
     };
-    if (categoryIds && categoryIds.length > 0) { // Check if categoryIds exists AND is not empty
+
+    if (categoryIds && categoryIds.length > 0) {
         createData.categories = {
             connect: categoryIds.map((id) => ({ id })),
         };
     }
-    if (variations && variations.length > 0) { // Check if variations exists AND is not empty
+
+    if (variations && variations.length > 0) {
         createData.variations = {
             create: variations.map(variation => ({
                 size: variation.size,
                 color: variation.color,
                 price: variation.price,
                 stock: variation.stock,
-                // images part needs to be conditional too if images can be empty
+                salePrice: variation.salePrice ?? 0.0,
                 images: {
-                  create: (variation.images || []).map(image => ({ url: image.url })),
+                    create: (variation.images || []).map(image => ({ url: image.url })),
                 },
             })),
         };
     }
+
+    if (galleryImages && galleryImages.length > 0) {
+        createData.galleryImages = {
+            create: galleryImages.map(image => ({ url: image.url })),
+        };
+    }
+
     const newProduct = await prisma.product.create({
-        data: createData, // Use the conditionally built createData
+        data: createData,
         include: {
             variations: {
                 include: {
@@ -104,63 +117,88 @@ async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
                 },
             },
             categories: true,
+            galleryImages: true, // Ensured galleryImages is included
         },
     });
 
     return newProduct;
-}
- async update(id: string, productData: CreateProductDTO): Promise<ProductEntity> {
-    const { name, description, categoryIds, variations } = productData;
-    const updateData: any = {}; // Use 'any' for now, or define a specific type for partial updates
-    if (name !== undefined) { // Check if name is explicitly provided
+  }
+
+   async update(id: string, productData: CreateProductDTO): Promise<ProductEntity> {
+    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages } = productData;
+    const updateData: any = {}; // Consider using Prisma.ProductUpdateInput for better type safety
+
+    if (name !== undefined) {
         updateData.name = name;
     }
-    if (description !== undefined) { // Check if description is explicitly provided
+    if (description !== undefined) {
         updateData.description = description;
     }
+    // Update thumbnailVideo: if provided, set it. If explicitly null, set to null.
+    if (thumbnailVideo !== undefined) {
+      updateData.thumbnailVideo = thumbnailVideo;
+    }
 
-    // Only include 'categories.set' if 'categoryIds' is provided
     if (categoryIds !== undefined) {
         updateData.categories = {
             set: categoryIds.map((catId) => ({ id: catId })),
         };
     }
+
     await prisma.product.update({
         where: { id },
-        data:updateData,
-        include: {
-            variations: {
-                include: { images: true },
-            },
-            categories: true,
-        },
+        data: updateData,
     });
 
-    //  If variations are provided, delete old and create new ones
-    if (variations && variations.length > 0) {
-        // Delete all variations and their images (because of onDelete: Cascade)
+    // Handle Variations (delete old, create new)
+    // The `variations !== undefined` guard works for the outer block.
+    // Inside, we need to handle the `null` possibility.
+    if (variations !== undefined) {
         await prisma.productVariation.deleteMany({
             where: { productId: id },
         });
 
-        // Create new variations
-        for (const variation of variations) {
-            await prisma.productVariation.create({
-                data: {
-                    size: variation.size,
-                    color: variation.color,
-                    price: variation.price,
-                    stock: variation.stock,
-                    product: { connect: { id } },
-                    images: {
-                        create: variation.images.map((img) => ({ url: img.url })),
+        // Now, `variations` is either an array or `null`.
+        // We only proceed if it's an array AND has elements.
+        if (variations !== null && variations.length > 0) { // <-- Explicitly check for null here
+            for (const variation of variations) {
+                await prisma.productVariation.create({
+                    data: {
+                        size: variation.size,
+                        color: variation.color,
+                        price: variation.price,
+                        stock: variation.stock,
+                        salePrice: variation.salePrice ?? 0.0,
+                        product: { connect: { id } },
+                        images: {
+                            // (variation.images || []) ensures it's an array for map
+                            create: (variation.images || []).map((img) => ({ url: img.url })),
+                        },
                     },
-                },
-            });
+                });
+            }
         }
     }
 
-    // 3. Return updated product with fresh relations
+    // Handle Gallery Images (delete old, create new)
+    // Same logic as variations
+    if (galleryImages !== undefined) {
+        await prisma.galleryImage.deleteMany({
+            where: { productId: id },
+        });
+
+        if (galleryImages !== null && galleryImages.length > 0) { 
+            for (const image of galleryImages) {
+                await prisma.galleryImage.create({
+                    data: {
+                        url: image.url,
+                        product: { connect: { id } },
+                    },
+                });
+            }
+        }
+    }
+
     const finalProduct = await prisma.product.findUnique({
         where: { id },
         include: {
@@ -170,33 +208,36 @@ async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
                 },
             },
             categories: true,
+            galleryImages: true,
         },
     });
 
-    return finalProduct!; // The '!' asserts it's not null, which should be true if the update succeeded and the product exists.
-}
-async delete(id: string): Promise<ProductEntity> {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      variations: {
-        include: {
-          images: true,
-        },
-      },
-      categories: true,
-    },
-  });
-
-  if (!product) {
-    throw new Error("Product not found");
+    return finalProduct!;
   }
 
-  await prisma.product.delete({
-    where: { id },
-  });
 
-  return product;
-}
+  async delete(id: string): Promise<ProductEntity> {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        variations: {
+          include: {
+            images: true,
+          },
+        },
+        categories: true,
+        galleryImages: true,
+      },
+    });
 
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    await prisma.product.delete({
+      where: { id },
+    });
+
+    return product;
+  }
 }

@@ -1,39 +1,81 @@
 'use client'
 import React, { useState } from 'react';
 
-import { ProductEntity,ProductImageEntity,ProductVariationEntity } from '@/core/entities/product.entity'; 
+import { ProductEntity,ProductImageEntity,ProductVariationEntity, GalleryImageEntity } from '@/core/entities/product.entity';
 import { Button } from '@/components/ui/button';
 import ShippingInfo from './ShippingInfo';
+import { PlayIcon } from '@heroicons/react/24/outline';
+
 interface SingleProductCardProps {
   product: ProductEntity;
 }
 
+interface VideoThumbnailData extends ProductImageEntity {
+  id: 'product-video';
+  videoUrl: string;
+}
+
+type ThumbnailDataType = ProductImageEntity | GalleryImageEntity | VideoThumbnailData;
+
+type MainContentType = {
+    type: 'image' | 'video';
+    data: ThumbnailDataType;
+} | null;
+
+
 const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
-  // State for selected variation (for size /color)
-  // Initialize with the first variation if available, or null
   const [selectedVariation, setSelectedVariation] = useState<ProductVariationEntity | null>(
     product.variations && product.variations.length > 0 ? product.variations[0] : null
   );
 
-  // State for the main image displayed
-  // Initialize with the first image of the selected variation, or null
-  const [mainImage, setMainImage] = useState<ProductImageEntity | null>(
-    selectedVariation && selectedVariation.images.length > 0 ? selectedVariation.images[0] : null
-  );
+  const videoPosterImageUrl = product.galleryImages && product.galleryImages.length > 0
+    ? product.galleryImages[0].url
+    : "https://placehold.co/600x600/cccccc/ffffff?text=Video+Thumbnail";
 
-  // Update main image and selected variation when a new variation is chosen
+
+  const initialMainContent: MainContentType = (() => {
+    if (selectedVariation && selectedVariation.images.length > 0) {
+      return { type: 'image', data: selectedVariation.images[0] };
+    }
+    if (product.thumbnailVideo) {
+      return {
+        type: 'video',
+        data: {
+          id: 'product-video',
+          url: videoPosterImageUrl,
+          videoUrl: product.thumbnailVideo
+        } as VideoThumbnailData
+      };
+    }
+    return null;
+  })();
+
+  const [mainContent, setMainContent] = useState<MainContentType>(initialMainContent);
+
   const handleVariationChange = (variation: ProductVariationEntity) => {
     setSelectedVariation(variation);
     if (variation.images.length > 0) {
-      setMainImage(variation.images[0]);
+      setMainContent({ type: 'image', data: variation.images[0] });
+    } else if (product.thumbnailVideo) {
+      setMainContent({
+        type: 'video',
+        data: {
+          id: 'product-video',
+          url: videoPosterImageUrl,
+          videoUrl: product.thumbnailVideo
+        } as VideoThumbnailData
+      });
     } else {
-      setMainImage(null);
+      setMainContent(null);
     }
   };
 
-  // Update main image when a thumbnail is clicked
-  const handleThumbnailClick = (image: ProductImageEntity) => {
-    setMainImage(image);
+  const handleThumbnailClick = (image: ProductImageEntity | GalleryImageEntity) => {
+    setMainContent({ type: 'image', data: image });
+  };
+
+  const handleVideoThumbnailClick = (videoThumbnailData: VideoThumbnailData) => {
+    setMainContent({ type: 'video', data: videoThumbnailData });
   };
 
   if (!product) {
@@ -44,11 +86,9 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
     );
   }
 
-  // Determine if there are sizes other than "Standard" or if there's only one size
   const hasMultipleSizes = new Set(product.variations?.map(v => v.size)).size > 1;
   const sizes = Array.from(new Set(product.variations?.map(v => v.size))).sort();
 
-  // Determine if there are multiple colors for the selected size
   const colorsForSelectedSize = selectedVariation
     ? Array.from(new Set(product.variations?.filter(v => v.size === selectedVariation.size).map(v => v.color)))
     : [];
@@ -62,7 +102,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
     showCustomMessage('Proceeding to checkout for this product.');
   };
 
-  // Function to show a custom message box (replacement for alert/confirm)
   const showCustomMessage = (message: string) => {
     const messageBox = document.createElement('div');
     messageBox.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
@@ -81,47 +120,88 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
     });
   };
 
-  // Determine stock status for the selected variation
   const stockStatus = selectedVariation ? selectedVariation.stock : 0;
-  const isLowStock = stockStatus > 0 && stockStatus <= 5; // Example threshold for low stock
+  const isLowStock = stockStatus > 0 && stockStatus <= 5;
   const isInStock = stockStatus > 0;
+
+  const isVideoThumbnail = (thumbnail: ThumbnailDataType): thumbnail is VideoThumbnailData => {
+    return (thumbnail as VideoThumbnailData).videoUrl !== undefined && thumbnail.id === 'product-video';
+  };
+
+  const allThumbnails: ThumbnailDataType[] = [
+    ...(selectedVariation?.images || []),
+    ...((product.galleryImages || []).filter(
+      (galImage) => !(selectedVariation?.images || []).some(varImage => varImage.url === galImage.url)
+    )),
+    ...(product.thumbnailVideo ? [{
+        id: 'product-video',
+        url: videoPosterImageUrl,
+        videoUrl: product.thumbnailVideo
+    } as VideoThumbnailData ] : []),
+  ].filter((item, index, self) =>
+    index === self.findIndex((t) => {
+      if (isVideoThumbnail(t) && isVideoThumbnail(item)) {
+        return t.url === item.url && t.videoUrl === item.videoUrl;
+      }
+      if (isVideoThumbnail(t) !== isVideoThumbnail(item)) {
+        return false;
+      }
+      return t.url === item.url;
+    })
+  );
+
 
   return (
     <div className='w-full bg-white mx-auto'>
         <div className="flex flex-col lg:flex-row bg-white  overflow-hidden max-w-6xl mx-auto my-8 font-inter">
-      {/* Image Gallery */}
+      {/* Image/Video Gallery */}
       <div className="w-full lg:w-1/2 flex flex-col md:flex-row p-4 items-center">
         {/* Thumbnails */}
         <div className="flex flex-row md:flex-col gap-3 p-2 border-r-0 md:border-r border-gray-200">
-          {product.variations?.flatMap(v => v.images).filter((image, index, self) =>
-            index === self.findIndex((t) => (
-              t.url === image.url // Filter for unique images across variations
-            ))
-          ).map((image) => (
-            <div
-              key={image.id}
-              className={`w-20 h-20 relative rounded-md overflow-hidden cursor-pointer shadow-sm
-                ${mainImage?.url === image.url ? 'border-2 border-blue-500' : 'border border-gray-200'}`}
-              onClick={() => handleThumbnailClick(image)}
-            >
-              <img
-                src={image.url}
-                alt={`Thumbnail of ${product.name}`}
-                className="w-full h-full object-cover rounded-md"
-                onError={(e) => {
-                  e.currentTarget.src = `https://placehold.co/80x80/cccccc/ffffff?text=Image+Error`;
-                }}
-              />
-            </div>
-          ))}
+          {allThumbnails.map((thumbnail) => {
+            // Determine if the current thumbnail is the active one
+            let isActiveThumbnail = false;
+            if (mainContent) {
+              if (isVideoThumbnail(thumbnail) && isVideoThumbnail(mainContent.data)) {
+                // Both are video thumbnails, compare URL and video URL
+                isActiveThumbnail = thumbnail.url === mainContent.data.url && thumbnail.videoUrl === mainContent.data.videoUrl;
+              } else if (!isVideoThumbnail(thumbnail) && !isVideoThumbnail(mainContent.data)) {
+                isActiveThumbnail = thumbnail.url === mainContent.data.url;
+              }
+            }
+
+            return (
+              <div
+                key={thumbnail.id}
+                className={`w-20 h-20 relative rounded-md overflow-hidden cursor-pointer shadow-sm
+                  ${isActiveThumbnail ? 'border-2 border-blue-500' : 'border border-gray-200'}
+                  ${isVideoThumbnail(thumbnail) ? 'relative' : ''}`}
+                onClick={() => isVideoThumbnail(thumbnail) ? handleVideoThumbnailClick(thumbnail) : handleThumbnailClick(thumbnail)}
+              >
+                <img
+                  src={thumbnail.url}
+                  alt={`Thumbnail of ${product.name}${isVideoThumbnail(thumbnail) ? ' Video' : ''}`}
+                  className="w-full h-full object-cover rounded-md"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://placehold.co/80x80/cccccc/ffffff?text=Image+Error`;
+                  }}
+                />
+                {isVideoThumbnail(thumbnail) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-md">
+                    <PlayIcon className="w-8 h-8 text-white" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Main Image */}
+        {/* Main Image/Video Display */}
         <div className="flex-grow p-4 flex justify-center items-center w-full aspect-square">
-          {mainImage ? (
+          {mainContent?.type === 'image' && mainContent.data ? (
             <div className="relative w-full h-full">
               <img
-                src={mainImage.url}
+                src={mainContent.data.url}
                 alt={`${product.name} - Main Image`}
                 className="w-full h-full object-contain rounded-lg"
                 onError={(e) => {
@@ -129,15 +209,35 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
                 }}
               />
             </div>
+          ) : mainContent?.type === 'video' && isVideoThumbnail(mainContent.data) && mainContent.data.videoUrl ? (
+            <div className="relative w-full h-full bg-black rounded-lg flex items-center justify-center">
+              <video
+                controls
+                autoPlay
+                src={mainContent.data.videoUrl}
+                poster={mainContent.data.url}
+                className="w-full h-full object-contain rounded-lg"
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  e.currentTarget.parentNode?.querySelector('.video-error-message')?.remove();
+                  const errorMessage = document.createElement('div');
+                  errorMessage.className = 'absolute inset-0 flex items-center justify-center text-red-400 bg-black bg-opacity-75 rounded-lg video-error-message';
+                  errorMessage.innerText = 'Video failed to load.';
+                  e.currentTarget.parentNode?.appendChild(errorMessage);
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
           ) : (
             <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-              No Image Available
+              No Media Available
             </div>
           )}
         </div>
       </div>
 
-      {/* Product Details */}
+      {/* Product Details (rest of your component remains the same) */}
       <div className="w-full lg:w-1/2 p-6 flex flex-col justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
@@ -145,7 +245,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
             Rs. {selectedVariation ? selectedVariation.price.toFixed(2) : 'N/A'}
           </p>
             <div className="w-full border-t border-gray-300"></div>
-          {/* Size Selection - Only show if there are multiple explicit sizes */}
           {hasMultipleSizes && (
             <div className="mb-4">
               <h2 className="text-md uppercase font-semibold text-gray-700 mb-2">SIZE</h2>
@@ -170,8 +269,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
               </div>
             </div>
           )}
-
-          {/* Color Selection - Only show if there are multiple colors for the selected size */}
           {hasMultipleColors && (
             <div className="mb-4">
               <h2 className="text-md uppercase font-semibold text-gray-700 mb-2">COLOR</h2>
@@ -195,8 +292,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
               </div>
             </div>
           )}
-          
-          {/* Always show color if only one variation */}
           {!hasMultipleColors && selectedVariation?.color && (
             <div className="mb-4">
               <h2 className="text-md uppercase font-semibold text-gray-700 mb-2">COLOR</h2>
@@ -205,8 +300,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
               </span>
             </div>
           )}
-
-
           <div className="mb-6 text-gray-600 text-sm">
             <p className="mb-1 flex items-center">
               <span className="mr-2">🌍</span> Free worldwide shipping
@@ -222,39 +315,31 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
               </p>
             )}
           </div>
-
-          {/* Action Buttons */}
           <div className="flex flex-col space-y-3 mb-6">
             <Button
               className="w-full bg-gray-900 text-white py-5 px-6 rounded-md font-semibold text-lg hover:bg-gray-700 transition-colors duration-300 shadow-md"
               onClick={handleAddToCart}
-              disabled={!isInStock} // Disable if out of stock
+              disabled={!isInStock}
             >
               ADD TO CART
             </Button>
             <Button
               className="w-full border border-gray-900 text-white  hover:text-black py-5 px-6 rounded-md font-semibold text-lg hover:bg-gray-100 transition-colors duration-300 shadow-md"
               onClick={handleBuyNow}
-              disabled={!isInStock} // Disable if out of stock
+              disabled={!isInStock}
             >
               BUY IT NOW
             </Button>
           </div>
-
           <p className="text-xs text-gray-500 mb-6">
             This is a demonstration store.
           </p>
-
-          {/* Product Description */}
           <div className="mb-6">
-            {/* <h2 className="text-md uppercase font-semibold text-gray-700 mb-2">Description</h2> */}
             <p className="text-gray-700 leading-relaxed text-sm">
               {product.description}
             </p>
           </div>
         </div>
-
-        {/* Shipping Information (Accordion-like, simplified for now) */}
       <ShippingInfo/>
       </div>
     </div>

@@ -5,6 +5,12 @@ export interface ProductImageEntity {
   productVariationId?: string;
   createdAt?: Date; 
 }
+export interface GalleryImageEntity {
+  id: string;
+  url: string;
+  productId?: string; 
+  createdAt?: Date;
+}
 
 export interface ProductVariationEntity {
   id: string;
@@ -12,6 +18,7 @@ export interface ProductVariationEntity {
   size: string;
   color: string;
   price: number;
+  salePrice: number;
   stock: number;
   createdAt?: Date; 
   updatedAt?: Date; 
@@ -23,7 +30,9 @@ export interface ProductEntity {
   name: string;
   description: string;
   createdAt: Date;
-  updatedAt: Date; 
+  updatedAt: Date;
   variations: ProductVariationEntity[];
   categories: CategoryEntity[];
+  thumbnailVideo: string | null; 
+  galleryImages: GalleryImageEntity[]; 
 }

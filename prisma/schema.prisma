@@ -27,29 +27,35 @@ model User {
   isAdmin   Boolean  @default(false)
   otp       String?
   otpExpiresAt DateTime?
+  carts     Cart[]
 }
 
 model Product {
-  id          String             @id @default(cuid())
-  name        String
-  description String             @db.Text
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  variations  ProductVariation[]
-  categories  Category[]         @relation("ProductToCategory")
+  id             String             @id @default(cuid())
+  name           String
+  description    String             @db.Text
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  variations     ProductVariation[]
+  categories     Category[]         @relation("ProductToCategory")
+  thumbnailVideo String             @default("")     
+  galleryImages  GalleryImage[]
 }
 
 model ProductVariation {
   id        String   @id @default(cuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  size      String // e.g., "S", "M", "L", "XL"
-  color     String // e.g., "Red", "Blue", "Green"
+  size      String
+  color     String
   price     Float
+  salePrice Float     @default(0.0)  
   stock     Int
   images    ProductImage[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  cartItems CartItem[]
+  orderItems OrderItem[] @relation("ProductVariationToOrderItem")
 
   @@unique([productId, size, color])
 }
@@ -59,6 +65,13 @@ model ProductImage {
   url                String
   productVariationId String
   productVariation   ProductVariation @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
+  createdAt          DateTime         @default(now())
+}
+model GalleryImage {
+  id                 String           @id @default(cuid())
+  url                String
+  productId String
+  product            Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())
 }
 
@@ -85,15 +98,17 @@ model Order {
 }
 
 model OrderItem {
-  id                 String   @id @default(cuid())
+  id                 String           @id @default(cuid())
   orderId            String
-  order              Order    @relation(fields: [orderId], references: [id])
-  productVariationId String
+  order              Order            @relation(fields: [orderId], references: [id])
+  productVariationId String          
+  productVariation   ProductVariation @relation("ProductVariationToOrderItem", fields: [productVariationId], references: [id]) 
   quantity           Int
-  price              Float
-  createdAt          DateTime @default(now())
-}
+  price              Float            
+  createdAt          DateTime         @default(now())
 
+  @@unique([orderId, productVariationId]) // Unique constraint: one variation per order
+}
 model Coupon {
   id          String   @id @default(cuid())
   code        String   @unique
@@ -103,4 +118,33 @@ model Coupon {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   orders      Order[]
+}
+
+model Cart {
+  id           String     @id @default(cuid()) 
+  userId       String?   
+  user         User?      @relation(fields: [userId], references: [id]) 
+  status       String     @default("active") // e.g., "active", "abandoned", "converted_to_order"
+  items        CartItem[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  lastActivity DateTime   @default(now()) @updatedAt // Updates on any cart or cart item change
+}
+
+model CartItem {
+  id                 String           @id @default(cuid()) 
+  cartId             String          
+  cart               Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade) 
+
+  productVariationId String           
+  productVariation   ProductVariation @relation(fields: [productVariationId], references: [id]) 
+
+  quantity           Int              @default(1)
+  price              Float            
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  // Composite unique constraint to ensure a specific product variation appears only once per cart
+  @@unique([cartId, productVariationId])
 }

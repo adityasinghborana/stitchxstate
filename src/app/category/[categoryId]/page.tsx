@@ -1,6 +1,3 @@
-// src/app/category/[categoryId]/page.tsx
-// This is a Server Component (no 'use client' at the top)
-
 import { ProductRepository } from '@/core/repositories/IProductRepository';
 import { GetProductsByCategoryUseCase } from '@/core/usecases/getProductByCategoryId';
 import { getCategoryByIdUSeCase } from '@/core/usecases/GetCategoryById.usecase';
@@ -11,12 +8,12 @@ import Link from 'next/link';
 
 interface ProductByCategoryPageProps {
   params: {
-    categoryId: string; // The dynamic segment from the URL, which is the category ID
+    categoryId: string; 
   };
 }
 
 export default async function ProductByCategoryPage({ params }: ProductByCategoryPageProps) {
-  // 1. Correctly destructure categoryId WITHOUT await
+
   const { categoryId } = await params;
 
   // Initialize your repositories
@@ -47,7 +44,6 @@ export default async function ProductByCategoryPage({ params }: ProductByCategor
     );
   }
 
-  // ... the rest of your component is perfect
   return (
     <div className="container mx-auto p-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">

@@ -5,7 +5,7 @@ import { ProductEntity } from '@/core/entities/product.entity';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // For page refresh
-import { ProductRepository } from '@/core/repositories/IProductRepository';
+import { ProductApiRepository } from '@/infrastructure/frontend/repositories/ProductRepository.api';
 import { deleteProductUsecase } from '@/core/usecases/DeleteProduct.usecase';
 
 interface ProductListTableProps {
@@ -14,7 +14,7 @@ interface ProductListTableProps {
 
 export default function ProductListTable({ products }: ProductListTableProps) {
   const router = useRouter();
-  const productRepository = new ProductRepository();
+  const productRepository = new ProductApiRepository();
   const DeleteProductUseCase = new deleteProductUsecase(productRepository);
 
   const handleDelete = async (productId: string, productName: string) => {

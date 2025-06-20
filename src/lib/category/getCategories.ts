@@ -6,5 +6,5 @@ import { GetAllCategoriesUseCase } from '@/core/usecases/GetAllCategory.usecase'
 export const getCategories = cache(async () => {
   const repo = new CategoryRepository();
   const useCase = new GetAllCategoriesUseCase(repo);
-  return await useCase.execute(); // returns CategoryEntity[]
+  return await useCase.execute(); 
 });

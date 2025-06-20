@@ -29,6 +29,12 @@ model User {
   otpExpiresAt DateTime?
   carts     Cart[]
 }
+model HomePage{
+  id        String    @id @default(cuid())
+  sections  Json      //Prisma to store the sections field as a JSON document in your database
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
 
 model Product {
   id             String             @id @default(cuid())

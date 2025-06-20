@@ -5,22 +5,26 @@ import CategoryPromoSection from '@/components/widget/CategoryPromoSection'
 import EssentialHero from '@/components/widget/EssentialHero'
 import Essential2 from '../components/widget/Essential2'
 import Look from '@/components/widget/Look'
-import { CategoryEntity } from '@/core/entities/category.entity'
 import Category from '@/components/widget/Category'
 import { getCategories } from '@/lib/category/getCategories'
+import { getHomePage } from '@/lib/HomePageSection/getHomePage';
 const Hero =async () => {
   const categories = await getCategories();
+  const homepageContent = await getHomePage();
+  if (!homepageContent) {
+    return <div className="text-center py-10">Failed to load homepage content.</div>;
+  }
   return (
     <div>
-        <HeroBanner/>
-        <BlackFridayHero/>
-        <CategoryPromoSection/>
+        <HeroBanner homepageSection={homepageContent} />
+        <BlackFridayHero homepageSection={homepageContent} />
+        <CategoryPromoSection homepageSection={homepageContent} />
 
         <div className='w-[75%] mx-auto'>
-          <EssentialHero/>
-          <Look/>
+          <EssentialHero homepageSection={homepageContent} />
+        <Look homepageSection={homepageContent} />
           <Category categories={categories.slice(0,4)}/>
-          <Essential2/>
+          <Essential2 homepageSection={homepageContent}/>
       </div>
     </div>
   )

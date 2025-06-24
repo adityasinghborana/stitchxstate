@@ -5,7 +5,7 @@ import { UpdateHomepageDTO } from "@/core/dtos/HomePage.dto";
 export class HomePageApiRepository implements IHomePageRepository{
     async getHomePage(): Promise<HomepageEntity | null> {
         try {
-            const response = await fetch('http://localhost:3000/api/homePage',{
+            const response = await fetch('/api/homePage',{
                 method:'GET',
                 headers:{
                     'Content-Type':'application/json'

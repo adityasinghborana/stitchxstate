@@ -41,7 +41,7 @@ export default function VerifyOtpPage(){
     }
     try {
         const response = await verifyApi.verifyOtpAndLogin(email,otp);
-        zustandLogin(response.token,response.user);
+        zustandLogin(response.user);
         router.push('/');
     } catch (err:any) {
         console.error('Verify OTP Error:', err);

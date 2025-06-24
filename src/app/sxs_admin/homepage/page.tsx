@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 // Correctly import the entities and define the union type explicitly for clarity
-import { HomepageEntity, CarouselSection, TimerSection,TwoImageFlexSection,PromoGrid,Look,Post,BlogPost } from '@/core/entities/HomePage.entity';
+import { HomepageEntity, CarouselSection, TimerSection,TwoImageFlexSection,PromoGrid,Look,BlogPost } from '@/core/entities/HomePage.entity';
 import { HomePageUseCases } from '@/core/usecases/HomePage.usecase';
 import { HomePageApiRepository } from '@/infrastructure/frontend/repositories/HomePage.api';
 import { ImageApiRepository } from '@/infrastructure/frontend/repositories/ImageRepository.api';
@@ -224,19 +224,6 @@ const HomePageAdminPage: React.FC = () => {
     setEditingSection(newSection); // Open the editor for the new section
   }, [homepageContent]);
 
-  const handleRemoveSection = useCallback((sectionId: string) => {
-    if (window.confirm("Are you sure you want to remove this section? This action cannot be undone until saved.")) {
-      setHomepageContent((prev) => {
-        if (!prev) return null;
-        const updatedSections = (prev.sections as any[]).filter((sec) => sec.id !== sectionId);
-        return { ...prev, sections: updatedSections };
-      });
-      // If the removed section was being edited, close the editor pane
-      if (editingSection && editingSection.id === sectionId) {
-        setEditingSection(null);
-      }
-    }
-  }, [editingSection]);
 
   // Updated reorder logic to work with IDs, making it independent of the filtered view
   const handleReorderSections = useCallback((draggedId: string, targetId: string) => {

@@ -8,7 +8,20 @@ import Look from '@/components/widget/Look'
 import Category from '@/components/widget/Category'
 import { getCategories } from '@/lib/category/getCategories'
 import { getHomePage } from '@/lib/HomePageSection/getHomePage';
+import Products from '@/components/widget/Products'
+import { ProductRepository } from '@/core/repositories/IProductRepository'
+import { GetAllProductsUseCase } from '@/core/usecases/GetAllProducts.usecase';
+import { ProductEntity } from '@/core/entities/product.entity'
 const Hero =async () => {
+
+  const productRepository = new ProductRepository();
+  const productUsecase = new GetAllProductsUseCase(productRepository);
+  let data:ProductEntity[]=[];
+  try {
+    data = await productUsecase.execute();
+  } catch (error) {
+    console.log(error);
+  }
   const categories = await getCategories();
   const homepageContent = await getHomePage();
   if (!homepageContent) {
@@ -17,12 +30,13 @@ const Hero =async () => {
   return (
     <div>
         <HeroBanner homepageSection={homepageContent} />
-        <BlackFridayHero homepageSection={homepageContent} />
-        <CategoryPromoSection homepageSection={homepageContent} />
 
         <div className='w-[75%] mx-auto'>
+          <Products products={data.slice(0,8)}/>
+          <BlackFridayHero homepageSection={homepageContent} />
+          <CategoryPromoSection homepageSection={homepageContent} />
           <EssentialHero homepageSection={homepageContent} />
-        <Look homepageSection={homepageContent} />
+          <Look homepageSection={homepageContent} />
           <Category categories={categories.slice(0,4)}/>
           <Essential2 homepageSection={homepageContent}/>
       </div>

@@ -41,7 +41,7 @@ const CategoryPromoSection = ({ homepageSection }: Props) => {
   const img2CtaText = 'SHOP GIFT CARDS'; 
 
   return (
-    <div className='flex justify-center mx-auto w-[76%] mt-20 mb-10 space-x-3'> 
+    <div className='flex justify-center mx-auto  mt-20 mb-10 space-x-3'> 
       <div className='relative flex-1 h-[400px]'> 
         <Image
           src={img1Src}
@@ -54,7 +54,7 @@ const CategoryPromoSection = ({ homepageSection }: Props) => {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-opacity-30 p-4"> {/* Added p-4 for padding */}
           <h1 className="text-3xl md:text-5xl font-light mb-2 tracking-wide text-center">{img1Title}</h1> {/* Added text-center */}
           {img1Subtitle && <h2 className="text-3xl md:text-5xl font-serif mb-2 tracking-wide text-center">{img1Subtitle}</h2>} {/* Conditional subtitle */}
-          <Button className='rounded-none bg-[#021826]'>{img1CtaText}</Button>
+          <Button className='rounded-none bg-white text-black mt-2 hover:text-white font-bold '>{img1CtaText}</Button>
         </div>
       </div>
 
@@ -81,7 +81,7 @@ const CategoryPromoSection = ({ homepageSection }: Props) => {
               ))}
             </p>
           )}
-          <Button className='rounded-none bg-white text-black mt-2 font-bold'>{img2CtaText}</Button>
+          <Button className='rounded-none bg-white text-black mt-2 hover:text-white font-bold'>{img2CtaText}</Button>
         </div>
       </div>
     </div>

@@ -78,7 +78,7 @@ const BlackFridayHero = ({ homepageSection }: Props) => {
   }
 
   return (
-    <div className='relative w-[76%] h-[400px] mx-auto mt-20 mb-10'>
+    <div className='relative  h-[400px] mx-auto mt-10 mb-10'>
       
       <Image
         src={imageUrl}

@@ -2,19 +2,11 @@ import { IProductRepository } from "@/core/repositories/IProductRepository";
 import { ProductEntity } from "@/core/entities/product.entity";
 import { CreateProductDTO } from "@/core/dtos/CreateProduct.dto";
 
-/**
- * ProductApiRepository is the implementation of the IProductRepository interface
- * that communicates with the backend REST API.
- * * It abstracts away all the details of HTTP communication (fetch, headers, body serialization).
- */
+
 export class ProductApiRepository implements IProductRepository {
 
-  /**
-   * Fetches all products from the backend API.
-   * @returns A promise that resolves to an array of ProductEntity.
-   */
+
   async findAll(): Promise<ProductEntity[]> {
-    // Make the GET request to our API endpoint.
     const response = await fetch('/api/products');
 
     // Check if the request was successful.

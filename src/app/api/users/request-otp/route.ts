@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaUserRepository } from "@/core/repositories/IUserRepository";
 import { RequestOtpUseCase } from "@/core/usecases/RequestOtp.usecase";
 import { RequestOtpDto } from "@/core/dtos/User.dto";
@@ -6,7 +6,7 @@ import { RequestOtpDto } from "@/core/dtos/User.dto";
 const userRepo = new PrismaUserRepository();
 const requestOtpUseCase= new RequestOtpUseCase(userRepo);
 
-export async function POST(request:Request){
+export async function POST(request:NextRequest){
     try {
         const  body:RequestOtpDto = await request.json();
         if(!body.email){

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { PrismaUserRepository } from "@/core/repositories/IUserRepository";
 import { VerifyOtpUseCase } from "@/core/usecases/verifyOtp.usecase";
 import { VerifyOtpDto } from "@/core/dtos/User.dto";
-import { cookies } from "next/headers";
 const userRepo = new PrismaUserRepository();
 const verifyOtpUseCase = new VerifyOtpUseCase(userRepo);
 
@@ -17,7 +16,7 @@ export async function POST(request:Request){
         response.cookies.set('token',loginResponse.token,{
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             path: '/',
             maxAge: 60 * 60, // 1 hour
         })

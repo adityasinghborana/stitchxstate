@@ -3,7 +3,7 @@
 import React, { ChangeEvent, FormEvent, useCallback, useState, useEffect } from 'react';
 import { ProductApiRepository } from '@/infrastructure/frontend/repositories/ProductRepository.api';
 import { CreateProductUseCase } from '@/core/usecases/CreateProduct.usecase';
-import type { CreateProductDTO, CreateProductVariationDTO } from '@/core/dtos/CreateProduct.dto';
+import type { CreateProductDTO } from '@/core/dtos/CreateProduct.dto';
 import { CategoryApiRepository } from '@/infrastructure/frontend/repositories/CategoryRepository.api';
 import { ImageApiRepository } from '@/infrastructure/frontend/repositories/ImageRepository.api';
 interface Category {

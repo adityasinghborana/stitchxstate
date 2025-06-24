@@ -55,14 +55,14 @@ export class ProductRepository implements IProductRepository {
           },
         },
       },
-      include: { // Moved galleryImages into include
+      include: { 
         categories: true,
         variations: {
           include: {
             images: true,
           },
         },
-        galleryImages: true, // Correctly placed inside include
+        galleryImages: true, 
       },
       orderBy: {
         createdAt: 'desc', 
@@ -150,16 +150,11 @@ export class ProductRepository implements IProductRepository {
         data: updateData,
     });
 
-    // Handle Variations (delete old, create new)
-    // The `variations !== undefined` guard works for the outer block.
-    // Inside, we need to handle the `null` possibility.
     if (variations !== undefined) {
         await prisma.productVariation.deleteMany({
             where: { productId: id },
         });
 
-        // Now, `variations` is either an array or `null`.
-        // We only proceed if it's an array AND has elements.
         if (variations !== null && variations.length > 0) { // <-- Explicitly check for null here
             for (const variation of variations) {
                 await prisma.productVariation.create({
@@ -180,8 +175,6 @@ export class ProductRepository implements IProductRepository {
         }
     }
 
-    // Handle Gallery Images (delete old, create new)
-    // Same logic as variations
     if (galleryImages !== undefined) {
         await prisma.galleryImage.deleteMany({
             where: { productId: id },

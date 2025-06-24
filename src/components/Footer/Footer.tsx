@@ -11,7 +11,7 @@ const App = () => {
  
 
   return (
-    <footer className=" py-12 px-4 md:px-8 lg:px-16 font-sans text-gray-700">
+    <footer className=" py-12 w-full px-4 md:px-8 lg:px-16 font-sans text-gray-700">
       <div className="max-w-7xl  grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Column 1: Product Categories */}
         <div className="flex flex-col space-y-2">

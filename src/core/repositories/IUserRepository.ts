@@ -4,15 +4,13 @@ import { CreateUserDto,UpdateUserDto,userResponseDto ,LoginResponseDto,RequestOt
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not defined");
 }
 const JWT_SECRET = process.env.JWT_SECRET;
 const OTP_EXPIRY_MINUTES =5; // otp valid for 5 minutes after five minutes it will expires
-const OTP_LENGTH = 6; //6 digit otp 
+
 
 
 // configure nodemailer transporter for sending email otp
@@ -188,7 +186,7 @@ export class PrismaUserRepository implements IUserRepository {
         where:{id:user.id},
         data:{otp:null,otpExpiresAt:null},
       });
-       // ✅ Generate JWT
+       //  Generate JWT
     const token = jwt.sign(
       {
         id: user.id,

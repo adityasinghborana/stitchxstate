@@ -74,6 +74,7 @@ export default function ProductListTable({ products }: ProductListTableProps) {
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {product.categories.map(cat => cat.name).join(', ') || 'N/A'}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.createdAt ? new Date(product.createdAt).toLocaleString() : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <Link href={`/sxs_admin/products/${product.id}/edit`}>
                     <button className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>

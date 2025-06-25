@@ -6,9 +6,10 @@ import { useAuthStore } from '../../../store/authStore';
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
+import jwt from 'jsonwebtoken';
+import Cookies from 'js-cookie';
 
 export default function VerifyOtpPage(){
     const router = useRouter();
@@ -41,6 +42,8 @@ export default function VerifyOtpPage(){
     }
     try {
         const response = await verifyApi.verifyOtpAndLogin(email,otp);
+        console.log('verification Response ',response);
+        Cookies.set('session', response.token, { expires: 1, path: '/' });
         zustandLogin(response.user);
         router.push('/');
     } catch (err:any) {

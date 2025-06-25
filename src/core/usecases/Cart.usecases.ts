@@ -10,11 +10,14 @@ export class CartUsecases {
     if (!userId) {
       throw new Error("User ID is required");
     }
-    const cart = await this.cartRepository.findByUserId(userId);
+    let cart = await this.cartRepository.findByUserId(userId);
     if (!cart) {
-      throw new Error("Failed to get or create cart");
+      cart = await this.cartRepository.create(userId);
+      if (!cart) {
+        throw new Error("Failed to create cart after not finding existing one.");
+      }
     }
-    return cart;
+    return cart; 
   }
 
   async getCart(userId: string): Promise<CartEntity> {

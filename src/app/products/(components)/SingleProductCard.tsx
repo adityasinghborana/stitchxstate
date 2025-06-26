@@ -1,11 +1,15 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ProductEntity,ProductImageEntity,ProductVariationEntity, GalleryImageEntity } from '@/core/entities/product.entity';
 import { Button } from '@/components/ui/button';
 import ShippingInfo from './ShippingInfo';
 import { PlayIcon } from '@heroicons/react/24/outline';
-
+import CartSidebar from '@/components/cart/CartSidebar';
+import { useCartStore } from '@/hooks/useCart';
+import { AddToCartDTO } from '@/core/dtos/Cart.dto';
+import { getCurrentUser } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 interface SingleProductCardProps {
   product: ProductEntity;
 }
@@ -27,7 +31,9 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   const [selectedVariation, setSelectedVariation] = useState<ProductVariationEntity | null>(
     product.variations && product.variations.length > 0 ? product.variations[0] : null
   );
-
+  const [isSidebar,setISSidebarOpen]=useState(false);
+  const { addToCart, getCart, cart } = useCartStore();
+  const router=useRouter()
   const videoPosterImageUrl = product.galleryImages && product.galleryImages.length > 0
     ? product.galleryImages[0].url
     : "https://placehold.co/600x600/cccccc/ffffff?text=Video+Thumbnail";
@@ -51,6 +57,19 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   })();
 
   const [mainContent, setMainContent] = useState<MainContentType>(initialMainContent);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
+  useEffect(() => {
+  const fetchUser = async () => {
+    const user = await getCurrentUser();
+    setCurrentUser(user);
+  };
+  fetchUser();
+}, []);
+  useEffect(() => {
+    if (setISSidebarOpen && !cart) { // Fetch cart if sidebar is open and cart is null
+      getCart();
+    }
+  }, [setISSidebarOpen, cart, getCart]);
 
   const handleVariationChange = (variation: ProductVariationEntity) => {
     setSelectedVariation(variation);
@@ -94,8 +113,22 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
     : [];
   const hasMultipleColors = colorsForSelectedSize.length > 1;
 
-  const handleAddToCart = () => {
-    showCustomMessage('Product added to cart!');
+  const handleAddToCart = async() => {
+    if(!selectedVariation || !isInStock) return;
+    if(!currentUser){
+      router.push('/login/request-otp')
+      return
+    }
+    const dto:AddToCartDTO={
+      productVariationId:selectedVariation.id,
+      quantity:1
+    };
+    try{
+      await addToCart(dto);
+      setISSidebarOpen(true);
+    }catch(err){
+      console.error('failed to add to cart :',err);
+    }
   };
 
   const handleBuyNow = () => {
@@ -343,6 +376,7 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
       <ShippingInfo/>
       </div>
     </div>
+    <CartSidebar isOpen={isSidebar} onClose={() => setISSidebarOpen(false)} />
     </div>
   );
 };

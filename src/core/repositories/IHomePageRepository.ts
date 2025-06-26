@@ -10,8 +10,6 @@ export interface IHomePageRepository {
 }
 
 
-// This type represents the raw structure returned by Prisma for your HomePage model
-// It includes the JsonValue type for 'sections'
 type PrismaHomePage = Prisma.HomePageGetPayload<{}>;
 
 
@@ -44,8 +42,6 @@ export class HomePageRepository implements IHomePageRepository {
       return null;
     }
 
-    // Map the raw Prisma record to the strongly-typed HomepageEntity before returning
-    // We already handled `homePageRecord` being null above.
     return this.mapPrismaHomePageToHomePageEntity(homePageRecord);
   }
 
@@ -60,11 +56,9 @@ export class HomePageRepository implements IHomePageRepository {
       const updatedPrismaHomepage = await prisma.homePage.update({
         where: { id: existingHomepage.id },
         data: {
-          // CORRECTED: Cast data.sections to unknown first, then to Prisma.JsonArray
           sections: data.sections as unknown as Prisma.JsonArray,
         },
       });
-      // Map the updated raw Prisma record to the strongly-typed HomepageEntity before returning
       return this.mapPrismaHomePageToHomePageEntity(updatedPrismaHomepage);
     } catch (error) {
       console.error(`Error updating homepage content with ID ${existingHomepage.id}:`, error);

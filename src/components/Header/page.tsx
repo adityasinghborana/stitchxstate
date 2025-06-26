@@ -12,11 +12,20 @@ import { BsSearch } from "react-icons/bs"; // For search icon
 import { useState } from 'react'; // Import useState hook
 import SearchInput from '../seachbar';
 import MobileMenu from './MobileSideBar';
-
-const Header = () => {
+import CartSidebar from '../cart/CartSidebar';
+import { HeaderSection } from '@/core/entities/Header.entity';
+interface HeaderProps {
+  header: HeaderSection;
+}
+const iconMap: Record<string, React.ReactNode> = {
+  instagram: <FaInstagram />,
+  facebook: <RiFacebookCircleFill />,
+  pinterest: <FaPinterest />
+};
+const Header = ({ header }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchInputVisible, setIsSearchInputVisible] = useState(false); // State to control search input visibility on mobile
-
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -24,6 +33,10 @@ const Header = () => {
   const toggleSearchInput = () => {
     setIsSearchInputVisible(!isSearchInputVisible);
   };
+  const handleCartToggle = () => {
+    setIsCartOpen(!isCartOpen);
+  };
+  const section=header.sections[0]
 
   return (
     <header className="font-sans">
@@ -98,7 +111,7 @@ const Header = () => {
           <button className="p-2 text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 rounded-full transition-colors duration-200" aria-label="User Account">
             <CiUser className="text-xl" />
           </button>
-          <button className="p-2 text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 rounded-full transition-colors duration-200" aria-label="Shopping Bag">
+          <button onClick={handleCartToggle} className="p-2 text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 rounded-full transition-colors duration-200" aria-label="Shopping Bag">
             <LiaShoppingBagSolid className="text-xl" />
           </button>
         </div>
@@ -110,6 +123,7 @@ const Header = () => {
           </div>
         )}
       </div>
+      <CartSidebar isOpen={isCartOpen} onClose={handleCartToggle}/>
 
       {/* Mobile Menu Component (slides in from left) */}
       <MobileMenu isOpen={isMobileMenuOpen} onClose={toggleMobileMenu} header={header} />

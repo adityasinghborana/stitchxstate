@@ -1,8 +1,10 @@
-// app/(components)/[id]/page.tsx
+// app/products/[id]/page.tsx
+
 import React from 'react';
 import { getProductByIdUSeCase } from '@/core/usecases/GetProductById.usecase';
-import { ProductRepository } from '@/core/repositories/IProductRepository';
+import { ProductApiRepository } from '@/infrastructure/frontend/repositories/ProductRepository.api';
 import SingleProductCard from '../(components)/SingleProductCard';
+import { getCurrentUser } from '@/lib/auth';
 
 interface ProductPageProps {
   params: {
@@ -11,9 +13,8 @@ interface ProductPageProps {
 }
 
 const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
-  const productId = await params.id;
-
-  const productRepository = new ProductRepository();
+  const productId = params.id;
+  const productRepository = new ProductApiRepository();
   const getProductUseCase = new getProductByIdUSeCase(productRepository);
 
   let product = null;
@@ -44,7 +45,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
-      <SingleProductCard product={product} />
+      <SingleProductCard product={product}/>
     </div>
   );
 };

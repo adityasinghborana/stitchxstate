@@ -1,20 +1,17 @@
-// lib/auth.ts
-import { cookies } from 'next/headers';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+// This function is safe to use in client components
+export async function getCurrentUser() {
+  try {
+    const res = await fetch('http://localhost:3000/api/users/me', {
+      method: 'GET',
+      credentials: 'include', 
+    });
 
-export async function getUserIdFromSession() {
-  // 1️⃣  Wait for the cookie store
-  const cookieStore = await cookies();
+    if (!res.ok) return null;
 
-  // 2️⃣  Read the http-only cookie that holds the JWT
-  const token = cookieStore.get('token')?.value;
-  if (!token) throw new Error('Unauthenticated');
-
-  // 3️⃣  Verify & decode
-  const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload & {
-    id?: string;          // you signed { id, email, ... }
-    sub?: string;         // or { sub }
-  };
-
-  return payload.id ?? payload.sub;   // return whichever claim you use
+    const data = await res.json();
+    return data.user;
+  } catch (err) {
+    console.error('Error fetching current user:', err);
+    return null;
+  }
 }

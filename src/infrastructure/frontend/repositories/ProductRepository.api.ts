@@ -54,7 +54,7 @@ export class ProductApiRepository implements IProductRepository {
     return data;
   }
   async findById(id: string): Promise<ProductEntity | null> {
-       const response = await fetch(`/api/products/${id}`);
+       const response = await fetch(`http://localhost:3000/api/products/${id}`);
             if (!response.ok) {
               if (response.status === 404) return null;
               const errorData = await response.json();
@@ -89,7 +89,7 @@ export class ProductApiRepository implements IProductRepository {
             return updated;
   }
   async delete(id: string): Promise<ProductEntity> {
-       const response = await fetch(`/api/category/${id}`, {
+       const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
     });
 

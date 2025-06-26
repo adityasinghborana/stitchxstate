@@ -22,21 +22,7 @@ export const metadata:Metadata={
     default: 'Welcome to My Next.js App', // Default title for the root route '/'
   },
   description: 'A starter Next.js application with authentication.',
-  // You can add other global meta tags here, e.g.:
-  // keywords: ['Next.js', 'Zustand', 'Authentication'],
-  // openGraph: {
-  //   title: 'My Next.js App',
-  //   description: 'A starter Next.js application with authentication.',
-  //   url: 'https://yourwebsite.com',
-  //   siteName: 'My Next.js App',
-  //   images: [
-  //     {
-  //       url: 'https://yourwebsite.com/og-image.jpg',
-  //       width: 800,
-  //       height: 600,
-  //     },
-  //   ],
-  // },
+  
 }
 
 export default function RootLayout({

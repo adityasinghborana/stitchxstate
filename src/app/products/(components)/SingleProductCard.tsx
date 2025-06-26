@@ -9,7 +9,7 @@ import CartSidebar from '@/components/cart/CartSidebar';
 import { useCartStore } from '@/hooks/useCart';
 import { AddToCartDTO } from '@/core/dtos/Cart.dto';
 import { getCurrentUser } from '@/lib/auth';
-
+import { useRouter } from 'next/navigation';
 interface SingleProductCardProps {
   product: ProductEntity;
 }
@@ -33,7 +33,7 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   );
   const [isSidebar,setISSidebarOpen]=useState(false);
   const { addToCart, getCart, cart } = useCartStore();
-
+  const router=useRouter()
   const videoPosterImageUrl = product.galleryImages && product.galleryImages.length > 0
     ? product.galleryImages[0].url
     : "https://placehold.co/600x600/cccccc/ffffff?text=Video+Thumbnail";
@@ -116,7 +116,7 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   const handleAddToCart = async() => {
     if(!selectedVariation || !isInStock) return;
     if(!currentUser){
-      alert('please login to add the item to cart');
+      router.push('/login/request-otp')
       return
     }
     const dto:AddToCartDTO={

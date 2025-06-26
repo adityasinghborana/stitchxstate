@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthZustandProvider from "@/providers/AuthZustandProvider";
 import Header from "@/components/Header/page";
 import Footer from "@/components/Footer/Footer";
+import { getHeader } from "@/lib/HeaderSection/getHeader";
+import { HeaderSection } from "@/core/entities/Header.entity";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,6 +19,7 @@ const geistMono = Geist_Mono({
 
 
 export const metadata:Metadata={
+  
   title: {
     template: '%s | My Next.js App', // '%s' will be replaced by page-specific title
     default: 'Welcome to My Next.js App', // Default title for the root route '/'
@@ -39,18 +42,23 @@ export const metadata:Metadata={
   // },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
+  
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const header: HeaderSection | null = await getHeader();
+  if (!header) {
+    throw new Error("Header data is required but was not found.");
+  }
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthZustandProvider>
-          <Header/>
+          <Header header={header}/>
         {children}
         <Footer/>
         </AuthZustandProvider>

@@ -13,8 +13,16 @@ import { useState } from 'react'; // Import useState hook
 import SearchInput from '../seachbar';
 import MobileMenu from './MobileSideBar';
 import CartSidebar from '../cart/CartSidebar';
-
-const Header = () => {
+import { HeaderSection } from '@/core/entities/Header.entity';
+interface HeaderProps {
+  header: HeaderSection;
+}
+const iconMap: Record<string, React.ReactNode> = {
+  instagram: <FaInstagram />,
+  facebook: <RiFacebookCircleFill />,
+  pinterest: <FaPinterest />
+};
+const Header = ({ header }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchInputVisible, setIsSearchInputVisible] = useState(false); // State to control search input visibility on mobile
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -28,6 +36,7 @@ const Header = () => {
   const handleCartToggle = () => {
     setIsCartOpen(!isCartOpen);
   };
+  const section=header.sections[0]
 
   return (
     <header className="font-sans">
@@ -40,18 +49,22 @@ const Header = () => {
       <div className="hidden md:flex border-b border-gray-100 px-6 py-3 justify-between items-center text-sm">
         {/* Left Navigation (Desktop only) */}
         <div className="flex ml-[12%] space-x-4">
-          <Link href="#"><span className="hover:underline cursor-pointer">Tops</span></Link>
-          <Link href="#"><span className="hover:underline cursor-pointer">Tunics</span></Link>
-          <Link href="#"><span className="hover:underline cursor-pointer">Dresses</span></Link>
-          <Link href="#"><span className="hover:underline cursor-pointer">Sweatshirts</span></Link>
+          {section.mainNavlinks.map((link, index) => (
+            <Link key={index} href={link.url}>
+              <span className="hover:underline cursor-pointer">{link.label}</span>
+            </Link>
+          ))}
         </div>
 
         {/* Social & Location (Desktop only) */}
         <div className="flex items-center space-x-3 mr-[12%]">
-          <FaInstagram width={18} height={18} />
-          <RiFacebookCircleFill width={18} height={18} />
-          <FaPinterest width={18} height={18} />
-          <span>Israel (USD $)</span>
+          {section.socialIcons.map((icon, index) => (
+            <Link key={index} href={icon.url}>
+              <span className="text-xl text-gray-700 hover:text-blue-600">
+                {iconMap[icon.iconName] || null}
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -69,11 +82,21 @@ const Header = () => {
 
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex flex-grow justify-center space-x-8 text-gray-700 font-medium text-sm">
-          <Link href="#" className="hover:text-blue-600 transition-colors duration-200">SHOP</Link>
-          <Link href="#" className="hover:text-blue-600 transition-colors duration-200">SEASON</Link>
-          <Link href="/" className="font-bold text-gray-900 text-xl whitespace-nowrap">STITCH X STATE</Link>
-          <Link href="#" className="hover:text-blue-600 transition-colors duration-200">JOURNAL</Link>
-          <Link href="#" className="hover:text-blue-600 transition-colors duration-200">THEME FEATURES</Link>
+          <Link href={section.mainNav.shop.url} className="hover:text-blue-600 transition-colors duration-200">
+            {section.mainNav.shop.label}
+          </Link>
+          <Link href={section.mainNav.season.url} className="hover:text-blue-600 transition-colors duration-200">
+            {section.mainNav.season.label}
+          </Link>
+          <Link href="/" className="font-bold text-gray-900 text-xl whitespace-nowrap">
+            {section.logo || "STITCH X STATE"}
+          </Link>
+          <Link href={section.mainNav.journal.url} className="hover:text-blue-600 transition-colors duration-200">
+            {section.mainNav.journal.label}
+          </Link>
+          <Link href={section.mainNav.themeFeatures.url} className="hover:text-blue-600 transition-colors duration-200">
+            {section.mainNav.themeFeatures.label}
+          </Link>
         </div>
 
         {/* Right-aligned icons (Search, User, Shopping Bag) */}
@@ -103,7 +126,7 @@ const Header = () => {
       <CartSidebar isOpen={isCartOpen} onClose={handleCartToggle}/>
 
       {/* Mobile Menu Component (slides in from left) */}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={toggleMobileMenu} />
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={toggleMobileMenu} header={header} />
 
       {/* Overlay for mobile menu (when open) */}
       {isMobileMenuOpen && (

@@ -13,8 +13,6 @@ export class HomePageUseCases{
     }
     return homepage;
     }
-
-    //  Updates the homepage content with new sections
     async updateHomePage(data:UpdateHomepageDTO):Promise<HomepageEntity>{
         const updatedHomepage = await this.homepageRepository.updateHomepage(data);
         console.log("HomePageUseCases: Homepage content updated successfully.");

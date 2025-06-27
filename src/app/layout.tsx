@@ -6,6 +6,8 @@ import Header from "@/components/Header/page";
 import Footer from "@/components/Footer/Footer";
 import { getHeader } from "@/lib/HeaderSection/getHeader";
 import { HeaderSection } from "@/core/entities/Header.entity";
+import { FooterSection } from "@/core/entities/Footer.entity";
+import { getFooter } from "@/lib/FooterSection/getFooter";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -38,6 +40,10 @@ export default async function RootLayout({
   if (!header) {
     throw new Error("Header data is required but was not found.");
   }
+  const footer:FooterSection | null= await getFooter();
+  if(!footer){
+    throw new Error("Footer data is required but was not found");
+  }
   return (
     <html lang="en">
       <body
@@ -46,7 +52,7 @@ export default async function RootLayout({
         <AuthZustandProvider>
           <Header header={header}/>
         {children}
-        <Footer/>
+        <Footer footer={footer}/>
         </AuthZustandProvider>
       </body>
     </html>

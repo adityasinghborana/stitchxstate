@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image'; // Image component is not used but kept if you plan to use it later
 import { FaInstagram } from "react-icons/fa";
 import { RiFacebookCircleFill } from "react-icons/ri";
 import { FaPinterest } from "react-icons/fa";

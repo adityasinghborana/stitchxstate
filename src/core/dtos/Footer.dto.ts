@@ -3,3 +3,8 @@
 // export interface UpdateHomepageDTO {
 //   sections: HomePageSection[];
 // }
+import { FooterEntity } from "../entities/Footer.entity";
+import { FooterSection } from "../entities/Footer.entity";
+export interface UpdateFooterDto{
+    sections:FooterEntity[];
+}

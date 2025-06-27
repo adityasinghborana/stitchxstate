@@ -1,5 +1,4 @@
 import React from 'react';
-import { productCategories,seasons,infoLinks } from './FooterData';
 import { FaInstagram } from "react-icons/fa";
 import { FaFacebook } from "react-icons/fa";
 import { FaPinterest } from "react-icons/fa";

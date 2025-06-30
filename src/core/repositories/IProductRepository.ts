@@ -1,6 +1,7 @@
 // core/repositories/ProductRepository.ts
 import { CreateProductDTO } from "../dtos/CreateProduct.dto";
 import { ProductEntity } from "../entities/product.entity";
+import { ProductVariationEntity } from "../entities/product.entity";
 import prisma from "@/lib/prisma";
 
 export interface IProductRepository {
@@ -10,6 +11,11 @@ export interface IProductRepository {
   update(id: string, productData: CreateProductDTO): Promise<ProductEntity>;
   delete(id: string): Promise<ProductEntity>;
   findByCategoryId(categoryId: string): Promise<ProductEntity[]>;
+  updateProductVariationStock(
+        productVariationId: string,
+        newStock: number
+    ): Promise<ProductVariationEntity | null>;
+    findByProductVariationId(productVariationId: string): Promise<ProductEntity | null>;
 }
 
 export class ProductRepository implements IProductRepository {
@@ -23,7 +29,7 @@ export class ProductRepository implements IProductRepository {
           },
         },
         categories: true,
-        galleryImages: true, // Correctly included
+        galleryImages: true,
       },
     });
     return products as ProductEntity[];
@@ -259,8 +265,6 @@ export class ProductRepository implements IProductRepository {
             data: { url: image.url },
         });
     } catch (error) {
-        // Log the error and continue.
-        // This prevents a crash when an image ID doesn't exist in the DB.
         console.error(`Warning: Could not update gallery image with ID ${image.id}. It might have been deleted.`, error);
     }
 }
@@ -329,4 +333,36 @@ export class ProductRepository implements IProductRepository {
 
     return product;
   }
+  async updateProductVariationStock(
+        productVariationId: string,
+        newStock: number
+    ): Promise<ProductVariationEntity | null> {
+        try {
+            const updatedVariation = await prisma.productVariation.update({
+                where: { id: productVariationId },
+                data: { stock: newStock },
+                include: { images: true }
+            });
+            return updatedVariation as ProductVariationEntity;
+        } catch (error) {
+            console.error(`Error updating product variation stock for ${productVariationId}:`, error);
+            return null; 
+        }
+    }
+    async findByProductVariationId(productVariationId: string): Promise<ProductEntity | null> {
+    const product = await prisma.product.findFirst({
+        where: {
+            variations: {
+                some: {
+                    id: productVariationId,
+                },
+            },
+        },
+        include: {
+            variations: true,
+        },
+    });
+    return product as ProductEntity | null;
+}
+  
 }

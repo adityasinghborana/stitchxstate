@@ -1,4 +1,4 @@
-import { HeaderEntity, HeaderSection } from "../entities/Header.entity";
+import { HeaderEntity} from "../entities/Header.entity";
 
 export interface UpdateHeaderDTO{
     sections:HeaderEntity[];

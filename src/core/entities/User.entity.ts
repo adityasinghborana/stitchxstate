@@ -4,7 +4,7 @@ export class UserEntity {
         public firstName :string,
         public lastName :string,
         public email :string,
-        public password :string | null, //password can be null if you intend  to only use Otp  for login post creation
+        public password :string | null, 
         public createdAt :Date,
         public updatedAt :Date,
         public isAdmin:boolean,

@@ -34,6 +34,7 @@ export class CartRepository implements ICartRepository {
       id: string;
       cartId: string;
       productVariationId: string;
+      productId:string,
       quantity: number;
       price: number;
       createdAt: Date;
@@ -64,6 +65,7 @@ export class CartRepository implements ICartRepository {
       items: cart.items.map((item) => ({
         id: item.id,
         cartId: item.cartId,
+        productId:item.productId,
         productVariationId: item.productVariationId,
         productVariation: {
           id: item.productVariation.id,
@@ -258,6 +260,7 @@ export class CartRepository implements ICartRepository {
           data: {
             cartId: cart.id,
             productVariationId,
+            productId:productVariation.productId,
             quantity,
             price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
           },

@@ -58,6 +58,7 @@ model Product {
   categories     Category[]         @relation("ProductToCategory")
   thumbnailVideo String             @default("")     
   galleryImages  GalleryImage[]
+  cartItems      CartItem[]
 }
 
 model ProductVariation {
@@ -103,16 +104,19 @@ model Category {
 
 
 model Order {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  total       Float
-  status      String // e.g., "PENDING", "SHIPPED", "DELIVERED"
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
-  couponId    String?
-  coupon      Coupon?     @relation(fields: [couponId], references: [id])
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  total           Float
+  status          String // e.g., "PENDING", "SHIPPED", "DELIVERED"
+  paymentMethod   String
+  shippingAddress Json
+  contactInfo     Json
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  orderItems      OrderItem[]
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
 }
 
 model OrderItem {
@@ -158,7 +162,8 @@ model CartItem {
 
   productVariationId String           
   productVariation   ProductVariation @relation(fields: [productVariationId], references: [id]) 
-
+  productId          String
+  product            Product          @relation(fields: [productId], references: [id])
   quantity           Int              @default(1)
   price              Float            
 

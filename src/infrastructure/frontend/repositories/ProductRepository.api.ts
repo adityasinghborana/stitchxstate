@@ -1,5 +1,5 @@
 import { IProductRepository } from "@/core/repositories/IProductRepository";
-import { ProductEntity } from "@/core/entities/product.entity";
+import { ProductEntity, ProductVariationEntity } from "@/core/entities/product.entity";
 import { CreateProductDTO } from "@/core/dtos/CreateProduct.dto";
 
 
@@ -100,5 +100,19 @@ export class ProductApiRepository implements IProductRepository {
      const deletedProduct: ProductEntity = await response.json();
     return deletedProduct;
   }
+  // Operation not supported by this API repository directly. Stock updates are handled by backend order/cart processing.
+    async updateProductVariationStock(
+        productVariationId: string,
+        newStock: number
+    ): Promise<ProductVariationEntity | null> {
+        console.warn(`ProductApiRepository: updateProductVariationStock is not meant to be called directly from the frontend. This operation is handled by backend services.`);
+        throw new Error("Operation not supported by this API repository directly. Stock updates are handled by backend order/cart processing.");
+    }
+
+    async findByProductVariationId(id: string): Promise<ProductEntity | null> {
+
+        console.warn(`ProductApiRepository: findByProductVariationId is not implemented. Please check IProductRepository definition.`);
+        throw new Error("Method not implemented in ProductApiRepository. Check IProductRepository for correct methods.");
+    }
 }
 

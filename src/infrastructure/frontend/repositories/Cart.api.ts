@@ -1,6 +1,6 @@
 // src/lib/cartApi.ts
 import { ICartRepository } from "@/core/repositories/ICartRepository";
-import { CartEntity, CartItemEntity, CartStatus } from "@/core/entities/cart.entity";
+import { CartEntity, CartStatus } from "@/core/entities/cart.entity";
 import { AddToCartDTO, RemoveFromCartDTO, UpdateCartItemDTO, ClearCartDTO } from "@/core/dtos/Cart.dto";
 
 // Helper function to parse JSON data into CartEntity

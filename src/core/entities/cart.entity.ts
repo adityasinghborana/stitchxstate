@@ -9,7 +9,8 @@ export interface CartItemEntity {
     id: string;                        
     cartId: string;                   
     productVariationId: string;  
-    productVariation: ProductVariationEntity;    
+    productVariation: ProductVariationEntity; 
+    productId: string;   
     quantity: number;
     price: number;
     createdAt: Date;

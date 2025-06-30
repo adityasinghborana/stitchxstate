@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { ProductEntity,ProductImageEntity,ProductVariationEntity, GalleryImageEntity } from '@/core/entities/product.entity';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { useCartStore } from '@/hooks/useCart';
 import { AddToCartDTO } from '@/core/dtos/Cart.dto';
 import { getCurrentUser } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import { OrderApiRepository } from '@/infrastructure/frontend/repositories/OrderRepository.api';
+import { AddressEntity, ContactInfoEntity } from '@/core/entities/order.entity';
 interface SingleProductCardProps {
   product: ProductEntity;
 }
@@ -27,13 +29,14 @@ type MainContentType = {
 } | null;
 
 
-const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
+const SingleProductCard: React.FC<SingleProductCardProps> = ({ product}) => {
   const [selectedVariation, setSelectedVariation] = useState<ProductVariationEntity | null>(
     product.variations && product.variations.length > 0 ? product.variations[0] : null
   );
   const [isSidebar,setISSidebarOpen]=useState(false);
   const { addToCart, getCart, cart } = useCartStore();
   const router=useRouter()
+  const orderApi=useMemo(()=>new OrderApiRepository(),[]);
   const videoPosterImageUrl = product.galleryImages && product.galleryImages.length > 0
     ? product.galleryImages[0].url
     : "https://placehold.co/600x600/cccccc/ffffff?text=Video+Thumbnail";
@@ -130,9 +133,42 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
       console.error('failed to add to cart :',err);
     }
   };
-
-  const handleBuyNow = () => {
-    showCustomMessage('Proceeding to checkout for this product.');
+  const quantity=1;
+  const handleBuyNow = async() => {
+    if (!selectedVariation) {
+            alert('Please select a product variation (e.g., size or color) before buying now.');
+            return;
+      }
+      const shippingAddress:AddressEntity={
+        state:'',
+        firstName:'',
+        lastName:'',
+        address1:'',
+        address2:'',
+        city:'',
+        postalCode:'',
+        country:'',
+      }
+      const contactInfo:ContactInfoEntity={
+        email:'',
+        phone:'',
+      }
+      const paymentMethod="cash on delivery";
+      const orderDetails={
+        paymentMethod,
+        shippingAddress,
+        contactInfo
+      }
+      const priceToUse = selectedVariation.salePrice && selectedVariation.salePrice > 0
+        ? selectedVariation.salePrice
+        : selectedVariation.price;
+    if(!currentUser){
+      router.push('/login/request-otp')
+      return
+    }
+    const result= await orderApi.createOrderFromProduct(selectedVariation.id,currentUser.id,quantity,priceToUse,orderDetails);
+    const tempCartId=result.id
+    router.push(`/checkout?tempCartId=${tempCartId}`);
   };
 
   const showCustomMessage = (message: string) => {
@@ -273,9 +309,17 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
       {/* Product Details (rest of your component remains the same) */}
       <div className="w-full lg:w-1/2 p-6 flex flex-col justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-          <p className="text-2xl font-semibold text-gray-700 mb-4">
-            Rs. {selectedVariation ? selectedVariation.price.toFixed(2) : 'N/A'}
+          <h1 className="text-3xl font-bold  text-gray-900 mb-2">{product.name}</h1>
+          <p className="text-2xl font-semibold text-start  text-gray-700 mb-4">
+            {selectedVariation && (
+              <>
+                {selectedVariation.salePrice && selectedVariation.salePrice > 0 ? (
+                  <span className="text-red-600">Rs. {selectedVariation.salePrice.toFixed(2)}</span>
+                ) : (
+                  <span>Rs. {selectedVariation.price.toFixed(2)}</span>
+                )}
+              </>
+            )}
           </p>
             <div className="w-full border-t border-gray-300"></div>
           {hasMultipleSizes && (

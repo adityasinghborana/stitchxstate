@@ -1,3 +1,4 @@
+import { CartItemEntity } from "./cart.entity";
 import { CategoryEntity } from "./category.entity"; 
 export interface ProductImageEntity {
   id: string;
@@ -35,4 +36,5 @@ export interface ProductEntity {
   categories: CategoryEntity[];
   thumbnailVideo: string | null; 
   galleryImages: GalleryImageEntity[]; 
+  cartItems?:CartItemEntity[]
 }

@@ -12,6 +12,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { OrderApiRepository } from '@/infrastructure/frontend/repositories/OrderRepository.api';
 import { AddressEntity, ContactInfoEntity } from '@/core/entities/order.entity';
+import { PaymentMethodType } from '@/core/dtos/Order.dto';
 interface SingleProductCardProps {
   product: ProductEntity;
 }
@@ -133,42 +134,38 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product}) => {
       console.error('failed to add to cart :',err);
     }
   };
-  const quantity=1;
   const handleBuyNow = async() => {
     if (!selectedVariation) {
             alert('Please select a product variation (e.g., size or color) before buying now.');
             return;
       }
-      const shippingAddress:AddressEntity={
-        state:'',
-        firstName:'',
-        lastName:'',
-        address1:'',
-        address2:'',
-        city:'',
-        postalCode:'',
-        country:'',
-      }
-      const contactInfo:ContactInfoEntity={
-        email:'',
-        phone:'',
-      }
-      const paymentMethod="cash on delivery";
-      const orderDetails={
-        paymentMethod,
-        shippingAddress,
-        contactInfo
-      }
+      console.log("selectedvariationId:",selectedVariation.id)
       const priceToUse = selectedVariation.salePrice && selectedVariation.salePrice > 0
-        ? selectedVariation.salePrice
-        : selectedVariation.price;
+      ? selectedVariation.salePrice
+      : selectedVariation.price;
+      console.log("Price to use",priceToUse);
+      const imageUrl = selectedVariation.images && selectedVariation.images.length > 0
+        ? selectedVariation.images[0].url
+        : 'https://placehold.co/100x100'; 
+      const productName = product.name; // Product name will be from the main product
+      const size = selectedVariation.size || 'N/A';
+      const color = selectedVariation.color || 'N/A';
     if(!currentUser){
       router.push('/login/request-otp')
       return
     }
-    const result= await orderApi.createOrderFromProduct(selectedVariation.id,currentUser.id,quantity,priceToUse,orderDetails);
-    const tempCartId=result.id
-    router.push(`/checkout?tempCartId=${tempCartId}`);
+    const queryParams= new URLSearchParams({
+      type:'buy-now',
+      productVariationId:selectedVariation.id,
+      quantity:'1',
+      price:priceToUse.toString(),
+      imageUrl:imageUrl,
+      name:productName,
+      size:size,
+      color:color
+    
+    })
+    router.push(`/checkout?${queryParams}`);
   };
 
   const showCustomMessage = (message: string) => {

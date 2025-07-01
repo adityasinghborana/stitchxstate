@@ -16,9 +16,9 @@ export interface IOrderRepository{
         quantity: number,
         price: number, // Add price here, as it's not coming from cart item
         orderDetails: {
-            paymentMethod: PaymentMethodType;
-            shippingAddress: AddressEntity;
-            contactInfo: ContactInfoEntity;
+            paymentMethod?: PaymentMethodType;
+            shippingAddress?: AddressEntity;
+            contactInfo?: ContactInfoEntity;
         }
     ): Promise<orderEntity>;
 }

@@ -6,7 +6,7 @@ import { useCartStore } from '@/hooks/useCart';
 import { CartEntity, CartItemEntity } from '@/core/entities/cart.entity'; // Using central entity definitions
 import { XMarkIcon } from '@heroicons/react/24/outline'; // Close icon
 import { TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/solid'; // Icons for quantity and remove
-
+import { useRouter } from 'next/navigation';
 interface CartSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,7 +14,7 @@ interface CartSidebarProps {
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { cart, loading, error, getCart, updateCartItem, removeCartItem } = useCartStore();
-
+  const router = useRouter();
   useEffect(() => {
     // Only fetch cart if sidebar is open AND cart data is not already loaded or is null
     if (isOpen && !cart) {
@@ -38,6 +38,19 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const handleRemoveItem = async (itemId: string) => {
     await removeCartItem({ cartItemId: itemId });
   };
+  const handleCartCheckout = () => {
+        if (!cart || cart.items.length === 0) {
+            alert("Your cart is empty!");
+            return;
+        }
+
+        const queryParams = new URLSearchParams({
+            type: 'cart', 
+            cartId: cart.id, 
+        }).toString();
+
+        router.push(`/checkout?${queryParams}`);
+    };
 
   return (
     // Overlay for the sidebar
@@ -147,7 +160,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
             <p className="text-xs text-gray-500 mb-4">
               Shipping, taxes, and discount codes calculated at checkout.
             </p>
-            <button className="w-full bg-black text-white py-3 rounded-none hover:bg-gray-800 transition-colors font-medium uppercase tracking-wide"> {/* Button style from image */}
+            <button onClick={handleCartCheckout} className="w-full bg-black text-white py-3 rounded-none hover:bg-gray-800 transition-colors font-medium uppercase tracking-wide"> {/* Button style from image */}
               CHECK OUT
             </button>
           </div>

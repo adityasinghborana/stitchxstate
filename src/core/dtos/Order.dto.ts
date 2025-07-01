@@ -8,7 +8,8 @@ export interface UpdateOrderDto {
     contactInfo?: ContactInfoEntity;
 }
 export interface CreateOrderDto {
-    cartId: string;
+    cartId?: string;
+    userId:string;
     shippingAddress: {
         firstName: string;
         lastName: string;
@@ -43,4 +44,6 @@ export interface BuyNowDto {
         phone: string;
     };
     paymentMethod: PaymentMethodType;
+    userId: string; 
+    price: number;  
 }

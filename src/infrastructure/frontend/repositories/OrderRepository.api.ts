@@ -2,7 +2,7 @@ import { IOrderRepository } from "@/core/repositories/IOrderRepository";
 import { orderEntity, AddressEntity, ContactInfoEntity, OrderItemEntity } from "@/core/entities/order.entity";
 import { CreateOrderDto, BuyNowDto, UpdateOrderDto } from "@/core/dtos/Order.dto";
 import { CartEntity } from "@/core/entities/cart.entity";
-
+import { PaymentMethodType } from "@/core/dtos/Order.dto";
 // Helper function to get a cookie by name
 const getCookie = (name: string): string | null => {
     if (typeof document === 'undefined') {
@@ -85,14 +85,16 @@ export class OrderApiRepository implements IOrderRepository {
     async createOrder(cartData: CartEntity, orderDetails: {
         shippingAddress: AddressEntity;
         contactInfo: ContactInfoEntity;
-        paymentMethod: string;
+        paymentMethod: PaymentMethodType;
         couponId?: string | null;
+        userId:string
     }): Promise<orderEntity> {
         const payload: CreateOrderDto = {
             cartId: cartData.id,
             shippingAddress: orderDetails.shippingAddress,
             contactInfo: orderDetails.contactInfo,
             paymentMethod: orderDetails.paymentMethod,
+            userId:orderDetails.userId
         };
 
         const response = await fetch('/api/orders', {
@@ -111,12 +113,12 @@ export class OrderApiRepository implements IOrderRepository {
     }
 
     async createOrderFromProduct(
-        userId: string, // This userId needs to be included in the body
         productVariationId: string,
+        userId: string, // This userId needs to be included in the body
         quantity: number,
         price: number,
         orderDetails: {
-            paymentMethod: string;
+            paymentMethod: PaymentMethodType;
             shippingAddress: AddressEntity;
             contactInfo: ContactInfoEntity;
         }
@@ -127,17 +129,15 @@ export class OrderApiRepository implements IOrderRepository {
             shippingAddress: orderDetails.shippingAddress,
             contactInfo: orderDetails.contactInfo,
             paymentMethod: orderDetails.paymentMethod,
+            userId: userId, // Now correctly assigned
+            price: price,
         };
 
         const response = await fetch('/api/orders/buy-now', {
             method: 'POST',
             headers: getCommonHeaders(),
             credentials: 'include',
-            body: JSON.stringify({
-                userId: userId,
-                price, 
-                ...payload,
-            }),
+             body: JSON.stringify(payload), 
         });
 
         if (!response.ok) {

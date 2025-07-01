@@ -7,9 +7,15 @@ export interface UpdateOrderDto {
     shippingAddress?: AddressEntity;
     contactInfo?: ContactInfoEntity;
 }
+export interface CreateOrderItemDto {
+    productId: string;
+    productVariationId: string;
+    quantity: number;
+    price: number;
+}
 export interface CreateOrderDto {
     cartId?: string;
-    userId:string;
+    userId: string;
     shippingAddress: {
         firstName: string;
         lastName: string;
@@ -25,6 +31,7 @@ export interface CreateOrderDto {
         phone: string;
     };
     paymentMethod: PaymentMethodType;
+    items: CreateOrderItemDto[];
 }
 export interface BuyNowDto {
     productVariationId: string;

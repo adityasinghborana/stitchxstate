@@ -86,7 +86,8 @@ export class OrderRepository implements IOrderRepository {
                     include: {
                         productVariation: { 
                             include: {
-                                images: true 
+                                images: true,
+                                product:true
                             }
                         }
                     }
@@ -105,7 +106,8 @@ export class OrderRepository implements IOrderRepository {
                     include: {
                         productVariation: { 
                             include: {
-                                images: true 
+                                images: true,
+                                product:true
                             }
                         }
                     }
@@ -127,7 +129,8 @@ export class OrderRepository implements IOrderRepository {
                     include: {
                         productVariation: {
                             include: {
-                                images: true
+                                images: true,
+                                product:true
                             }
                         }
                     }
@@ -152,7 +155,8 @@ export class OrderRepository implements IOrderRepository {
                     include: {
                         productVariation: {
                             include: {
-                                images: true
+                                images: true,
+                                product:true
                             }
                         }
                     }
@@ -204,7 +208,8 @@ export class OrderRepository implements IOrderRepository {
                 include: {
                     productVariation: {
                         include: {
-                            images: true
+                            images: true,
+                            product:true
                         }
                     }
                 }

@@ -16,9 +16,9 @@ export class OrderUseCase{
         }
 
         for(const cartItem of cart.items){
-            const product= await this.productRepository.findById(cartItem.productId);
+            const product= await this.productRepository.findById(cartItem.productVariation.id);
             if (!product) {
-                throw new Error(`Product with ID ${cartItem.productId} not found.`);
+                throw new Error(`Product with ID ${cartItem.productVariation.id} not found.`);
             }
             const productVariation = product.variations.find(
                 (variation: ProductVariationEntity) => variation.id === cartItem.productVariationId

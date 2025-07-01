@@ -82,19 +82,10 @@ const parseOrderEntity = (data: any): orderEntity => {
 
 export class OrderApiRepository implements IOrderRepository {
 
-    async createOrder(cartData: CartEntity, orderDetails: {
-        shippingAddress: AddressEntity;
-        contactInfo: ContactInfoEntity;
-        paymentMethod: PaymentMethodType;
-        couponId?: string | null;
-        userId:string
-    }): Promise<orderEntity> {
+    async createOrder(cartData: CartEntity, orderDetails:Omit<CreateOrderDto,'cartId'>): Promise<orderEntity> {
         const payload: CreateOrderDto = {
             cartId: cartData.id,
-            shippingAddress: orderDetails.shippingAddress,
-            contactInfo: orderDetails.contactInfo,
-            paymentMethod: orderDetails.paymentMethod,
-            userId:orderDetails.userId
+            ...orderDetails
         };
 
         const response = await fetch('/api/orders', {

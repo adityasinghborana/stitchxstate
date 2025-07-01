@@ -122,7 +122,7 @@ const CheckoutPage= ()=>{
 
     const itemsToDisplay:OrderItemEntity[]=useMemo(()=>{
         if (orderData) {
-            return orderData.items; // Agar order pehle se bana hai
+            return orderData.items; 
         }
         if (cartData) {
             return cartData.items.map(cartItem => ({
@@ -136,12 +136,12 @@ const CheckoutPage= ()=>{
         }
         if (flowType === 'buy-now' && productVariationId && quantity && buyNowPrice > 0) {
             return [{
-                id: 'temp-buy-now-item', // Display ke liye temporary ID
+                id: 'temp-buy-now-item',
                 orderId: '',
                 productVariationId: productVariationId,
                 quantity: quantity,
                 price: buyNowPrice,
-                productVariation: { // URL parameters se dummy productVariation
+                productVariation: { 
                     id: productVariationId,
                     price: buyNowPrice,
                     salePrice: buyNowPrice,
@@ -149,13 +149,13 @@ const CheckoutPage= ()=>{
                     product: { name: buyNowProductName },
                     size: buyNowSize,
                     color: buyNowColor,
-                } as any, // Type assertion for simplified example
+                } as any,
             }];
         }
         return[]
     },[orderData, cartData, flowType, productVariationId, quantity, buyNowPrice, buyNowProductName, buyNowImageUrl, buyNowSize, buyNowColor])
     const totalPrice = itemsToDisplay.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shippingCost = 0; // Apni logic yahan daalein shipping cost calculate karne ki
+    const shippingCost = 0; 
     const totalPayable = totalPrice + shippingCost;
     const handlePlaceholder=async()=>{
         setError(null);
@@ -199,15 +199,24 @@ const CheckoutPage= ()=>{
                 const updatedOrder= await orderApi.updateOrder(orderData.id,updatePayload)
                 if(!updatedOrder) throw new Error('failed to update order')
                     finalOrderId=updatedOrder.id
-            }else if(cartData){
-                    const cartDetailsForApi = cartData;
-                    const orderDetailsForApi = {
-                        shippingAddress: shippingAddress,
-                        contactInfo: contactInfo,
-                        paymentMethod: selectedPaymentMethod,
-                        userId:currentUser.id
-                    };
-                    const newOrder = await orderApi.createOrder(cartDetailsForApi, orderDetailsForApi);
+                }else if(cartData){
+                     const orderItemsWithProductId = cartData.items.map(item => ({ 
+                    productId: item.productId, // Ensure this is available in cartData.items
+                    productVariationId: item.productVariationId,
+                    quantity: item.quantity,
+                    price: item.price,
+                }));
+
+                // This is the object that will be passed as the second argument to createOrder
+                const orderDetailsForApi: Omit<CreateOrderDto, 'cartId'> = {
+                    userId: currentUser.id,
+                    shippingAddress: shippingAddress,
+                    contactInfo: contactInfo,
+                    paymentMethod: selectedPaymentMethod,
+                    items: orderItemsWithProductId, // Include the mapped items here
+                };
+                // Calling orderApi.createOrder with two arguments: cartData and orderDetailsForApi
+                const newOrder = await orderApi.createOrder(cartData, orderDetailsForApi); 
                     if (!newOrder) throw new Error('Failed to create order from cart.');
                     finalOrderId = newOrder.id;
                     await cartApi.clearCart();

@@ -23,7 +23,7 @@ export default async function ProductEditPage({params}:ProductEditProps){
   }
   return(
     <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Product: {initialProduct.name}</h1>
+        <h1 className="text-2xl text-white font-bold mb-6">Edit Product: {initialProduct.name}</h1>
         <UpdateProductForm productId={productIdTouse}/>
     </div>
   )

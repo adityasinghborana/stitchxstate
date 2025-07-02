@@ -173,7 +173,7 @@ const FooterSectionPage=()=>{
     if (isloading) return <p className="p-6">Loading...</p>;
     if (!footerData) return <p className="p-6 text-red-500">No header data found</p>;
     return(
-        <div className="p-6 max-w-5xl mx-auto">
+        <div className="p-6 w-full mx-auto bg-white">
             <h2 className="text-2xl font-bold mb-4">Footer Management</h2>
             {error && <p className="text-red-600 mb-4">{error}</p>}
             {successMessage && <p className="text-green-600 mb-4">{successMessage}</p>}

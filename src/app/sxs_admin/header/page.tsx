@@ -143,7 +143,7 @@ const HeaderSectionPage = () => {
   if (!headerData) return <p className="p-6 text-red-500">No header data found</p>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto w-full bg-white">
       <h2 className="text-2xl font-bold mb-4">Header Management</h2>
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
@@ -192,7 +192,7 @@ const HeaderSectionPage = () => {
           ))}
           <button
             onClick={() => handleAddNavLink(sectionIndex)}
-            className="mt-2 bg-gray-200 px-3 py-1 rounded"
+            className="mt-2 bg-gray-200 px-3 py-1 text-black rounded"
           >➕ Add Nav Link</button>
 
           <h4 className="mt-6 font-semibold mb-2">Main Navigation</h4>
@@ -228,7 +228,7 @@ const HeaderSectionPage = () => {
                 value={icon.iconName}
                 placeholder="Icon Name"
                 readOnly
-                className="border p-1 w-1/3 bg-gray-100"
+                className="border p-1 w-1/3 bg-gray-100 text-black"
                 />
                 <input
                 type="text"

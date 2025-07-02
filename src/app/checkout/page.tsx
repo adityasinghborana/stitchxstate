@@ -215,7 +215,6 @@ const CheckoutPage= ()=>{
                     paymentMethod: selectedPaymentMethod,
                     items: orderItemsWithProductId, // Include the mapped items here
                 };
-                // Calling orderApi.createOrder with two arguments: cartData and orderDetailsForApi
                 const newOrder = await orderApi.createOrder(cartData, orderDetailsForApi); 
                     if (!newOrder) throw new Error('Failed to create order from cart.');
                     finalOrderId = newOrder.id;

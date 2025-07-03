@@ -5,6 +5,7 @@ import { ProductRepository } from "@/core/repositories/IProductRepository";
 import { PrismaUserRepository } from "@/core/repositories/IUserRepository";
 import { CartRepository } from "@/core/repositories/ICartRepository";
 import { validateAuth } from "../../middleware/validAuth";
+import { UpdateOrderDto } from "@/core/dtos/Order.dto";
 const orderRepository= new OrderRepository();
 const cartRepository=new CartRepository();
 const userRepository=new PrismaUserRepository();
@@ -36,7 +37,7 @@ export async function DELETE(req: NextRequest) {
             return NextResponse.json({ message: 'User ID is required for authorization.' }, { status: 401 });
         }
 
-        const success = await orderUseCase.deleteOrder(orderId, requestingUserId);
+        const success = await orderUseCase.deleteOrder(orderId);
 
         if (success) {
             return NextResponse.json({ message: `Order ${orderId} deleted successfully.` }, { status: 200 });
@@ -58,7 +59,7 @@ export async function DELETE(req: NextRequest) {
     }
 }
 
-export async function GET_SINGLE(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
         const url = new URL(req.url);
         const orderId = url.searchParams.get('orderId');
@@ -92,6 +93,53 @@ export async function GET_SINGLE(req: NextRequest) {
         return NextResponse.json(
             {
                 message: 'Failed to fetch order details.',
+                error: error.message,
+            },
+            { status: 500 }
+        );
+    }
+}
+export async function PUT(req: NextRequest) {
+    try {
+        const url = new URL(req.url);
+        const orderId = url.searchParams.get('orderId');
+
+        if (!orderId) {
+            return NextResponse.json({ message: 'Order ID is required in query parameters.' }, { status: 400 });
+        }
+
+        const auth = await validateAuth(req);
+        if (auth instanceof NextResponse) return auth;
+        if (!auth) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        
+        const requestingUserId = auth.userId;
+        if (!requestingUserId) {
+            return NextResponse.json({ message: 'User ID is required for authorization.' }, { status: 401 });
+        }
+
+        const payload: UpdateOrderDto = await req.json();
+
+        const updatedOrder = await orderUseCase.updateOrder(orderId, payload);
+
+        if (updatedOrder) {
+            return NextResponse.json({ message: 'Order updated successfully!', order: updatedOrder }, { status: 200 });
+        } else {
+            return NextResponse.json({ message: `Failed to update order ${orderId}.` }, { status: 500 });
+        }
+
+    } catch (error: any) {
+        console.error('Error updating order:', error);
+        if (error.message.includes('Unauthorized')) {
+            return NextResponse.json({ message: error.message }, { status: 403 });
+        }
+        if (error.message.includes('Order not found')) {
+            return NextResponse.json({ message: error.message }, { status: 404 });
+        }
+        return NextResponse.json(
+            {
+                message: 'Failed to update order.',
                 error: error.message,
             },
             { status: 500 }

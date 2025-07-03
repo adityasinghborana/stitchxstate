@@ -1,4 +1,3 @@
-import { ProductEntity } from "./product.entity";
 import { ProductVariationEntity } from "./product.entity";
 export enum CartStatus {
     ACTIVE = 'active',

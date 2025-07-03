@@ -131,7 +131,7 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
   };
 
   return (
-    <form onSubmit={handleSubmitCategory} className="space-y-6 p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto my-8">
+    <form onSubmit={handleSubmitCategory} className="space-y-6 p-6  bg-white shadow-lg rounded-lg w-full mx-auto my-8">
       <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-6">Edit Category: {initialCategory.name}</h2>
 
       {error && (

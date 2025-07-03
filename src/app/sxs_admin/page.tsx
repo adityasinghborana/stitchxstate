@@ -1,7 +1,13 @@
-export default function AdminDashboard() {
+import Dashboard from "./(_component)/Dashboard";
+import { DashboarduseCase } from "@/core/usecases/Dashboard.usecase";
+import { DashboardRepository } from "@/core/repositories/IDashboardRepository";
+import { PrismaUserRepository } from "@/core/repositories/IUserRepository";
+export default async function AdminDashboard() {
+    const userRepository = new PrismaUserRepository()
+    const dashboardRepository=new DashboardRepository(userRepository);
+    const dashboardUsecase = new DashboarduseCase(dashboardRepository);
+    const dashboardData = await dashboardUsecase.execute()
   return (
-    <div className="p-6">
-      <h1 className="text-2xl text-white font-bold">Welcome to the Admin Dashboard</h1>
-    </div>
+    <Dashboard dashboardData={dashboardData}/>
   );
 }

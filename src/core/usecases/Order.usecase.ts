@@ -1,7 +1,7 @@
 import { IOrderRepository } from "../repositories/IOrderRepository";
 import { ICartRepository } from "../repositories/ICartRepository";
 import { orderEntity } from "../entities/order.entity";
-import { CreateOrderDto } from "../dtos/Order.dto";
+import { CreateOrderDto, UpdateOrderDto } from "../dtos/Order.dto";
 import { IUserRepository } from "../repositories/IUserRepository";
 import { IProductRepository } from "../repositories/IProductRepository";
 import { ProductVariationEntity } from "../entities/product.entity";
@@ -60,6 +60,10 @@ export class OrderUseCase{
         
         return newOrder;
     }
+    async getAllOrders(): Promise<orderEntity[]> {
+        const orders = await this.orderRepository.findAll();
+        return orders;
+    }
     async getOrderBuUserId(userId:string):Promise<orderEntity[]>{
         const order = await this.orderRepository.findByUserId(userId);
         return order;
@@ -74,12 +78,16 @@ export class OrderUseCase{
         }
         return order
     }
-    async deleteOrder(orderId: string, requestingUserId: string): Promise<boolean> {
-        const requestingUser = await this.userRepository.findById(requestingUserId);
-
-        if (!requestingUser || !requestingUser.isAdmin) {
-            throw new Error('Unauthorized: Only admin users can delete orders.');
+    async updateOrder(orderId: string, data: UpdateOrderDto): Promise<orderEntity | null> {
+        const order = await this.orderRepository.findById(orderId);
+        if (!order) {
+            throw new Error('Order not found.');
         }
+
+        const updatedOrder = await this.orderRepository.updateOrder(orderId, data);
+        return updatedOrder;
+    }
+    async deleteOrder(orderId: string): Promise<boolean> {
         const success = await this.orderRepository.deleteOrder(orderId);
         if (!success) {
             throw new Error(`Failed to delete order ${orderId}.`);

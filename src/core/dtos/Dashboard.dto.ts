@@ -1,9 +1,22 @@
 import { orderEntity } from "../entities/order.entity";
 import { ProductVariationEntity } from "../entities/product.entity";
+export interface RecentOrderSummary {
+  id: string;
+  customerName: string;
+  totalAmount: number;
+  status: string; 
+  createdAt: Date;
+}
+export interface GrowthDataPoint {
+  period: string;
+  revenue: number;
+  orders: number;
+}
 export interface DashboardDto{
     totalSales:number;
     totalOrders:number;
     totalPurchase:number;
+    averageOrderValue:number;
     totalGrowth:{
         revenueGrowth:string;
         orderGrowth:string;
@@ -12,10 +25,8 @@ export interface DashboardDto{
     stockAlerts:Pick<ProductVariationEntity,  'id' | 'stock' | 'createdAt'>[];
     totalProducts:number;
     totalcategories:number;
-    totalRevenue:number;
-    mostViewedProduct: { id: string; name: string; views: number } | null; 
-    recentOrders: Pick<orderEntity, 'id'  | 'items' | 'status' | 'createdAt'>[];
+    recentOrders: RecentOrderSummary[];
     topProducts: { id: string; name: string; totalRevenue: number }[];
     orderStatusBreakdown: Record<string, number>;
-    trafficSources: Record<string, number>; 
+    growthHistory: GrowthDataPoint[];
 }

@@ -8,6 +8,7 @@ import { getHeader } from "@/lib/HeaderSection/getHeader";
 import { HeaderSection } from "@/core/entities/Header.entity";
 import { FooterSection } from "@/core/entities/Footer.entity";
 import { getFooter } from "@/lib/FooterSection/getFooter";
+import { Toaster } from 'react-hot-toast';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default async function RootLayout({
         <AuthZustandProvider>
           <Header header={header}/>
         {children}
+        <Toaster />
         <Footer footer={footer}/>
         </AuthZustandProvider>
       </body>

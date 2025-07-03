@@ -28,8 +28,8 @@ export default async function CategoryEditPage({ params }: CategoryEditPageProps
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Edit Category: {initialCategory.name}</h1>
+    <div className="container min-h-screen  mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-6 text-white">Edit Category: {initialCategory.name}</h1>
       {/* Pass the fetched initialCategory data and the categoryId to your Client Component */}
       <CategoryEditForm initialCategory={initialCategory} categoryId={categoryIdToUse} />
     </div>

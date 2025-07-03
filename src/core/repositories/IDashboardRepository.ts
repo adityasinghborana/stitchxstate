@@ -3,6 +3,11 @@ import { orderEntity } from "../entities/order.entity";
 import { ProductVariationEntity } from "../entities/product.entity";
 import { OrderItemEntity } from "../entities/order.entity";
 import { DashboardDto } from "../dtos/Dashboard.dto";
+import { RecentOrderSummary } from "../dtos/Dashboard.dto";
+import { PrismaUserRepository } from "./IUserRepository";
+import { IUserRepository } from "./IUserRepository";
+import { UserEntity } from "../entities/User.entity";
+import { GrowthDataPoint } from "../dtos/Dashboard.dto";
 interface TopProductData {
   id: string;
   name: string;
@@ -17,17 +22,23 @@ interface StockAlertData {
 }
 export interface IDashboardRepository{
     getSalesAndOrderSummary(): Promise<{ totalSales: number; totalOrders: number }>;
-    getRecentOrders(take?: number): Promise<Pick<orderEntity, 'id' | 'items' | 'createdAt'>[]>;
+    getRecentOrders(take?: number): Promise<RecentOrderSummary[]>;
     getTopSellingProducts(take?: number): Promise<TopProductData[]>;
     getOrderStatusBreakdown(): Promise<Record<string, number>>;
     getTotalProductsCount(): Promise<number>;
     getTotalCategoriesCount(): Promise<number>;
     getTotalUsersCount(): Promise<number>;
     getTotalItemsSold(): Promise<number>;
+    getUserById(userId:string):Promise<UserEntity |null>
     getGrowthMetrics(): Promise<{ revenueGrowth: string; orderGrowth: string }>;
     getLowStockAlerts(threshold: number): Promise<Pick<ProductVariationEntity,'id'|'price'|'createdAt'|'stock'>[]>;
+    getHistoricalGrowthData(periods: number): Promise<GrowthDataPoint[]>;
 }
 export class DashboardRepository implements IDashboardRepository{
+     private userRepository: IUserRepository;
+     constructor(userRepository: IUserRepository) {
+        this.userRepository = userRepository;
+    }
     async getSalesAndOrderSummary(): Promise<{ totalSales: number; totalOrders: number; }> {
         const salesData= await prisma.order.aggregate({
             _sum:{total:true},
@@ -38,12 +49,57 @@ export class DashboardRepository implements IDashboardRepository{
             totalOrders: salesData._count.id || 0,
     };  
     }
-    async getRecentOrders(take: number = 5): Promise<any[]> {
-        return prisma.order.findMany({
+    async getUserById(userId: string): Promise<UserEntity | null> {
+        // Yahan order.userId ki jagah jo userId aapko parameter mein mila hai, wo use karenge
+        const user = await this.userRepository.findById(userId);
+        return user;
+    }
+    async getRecentOrders(take: number = 5): Promise<RecentOrderSummary[]> {
+        const orderWithItems= await prisma.order.findMany({
             orderBy:{createdAt:'desc'},
             take:take,
-            select:{id:true,orderItems:true,total:true,status:true,createdAt:true}
-        })
+            select:{
+                id:true,
+                userId:true,
+                status:true,
+                createdAt:true,
+                orderItems:{
+                    select:{
+                        quantity:true,
+                        price:true
+                    }
+                }
+            }
+        });
+        const recentOrderSummaries: RecentOrderSummary[] = [];
+        for (const order of orderWithItems){
+            const totalAmount=order.orderItems.reduce((sum,item)=>sum+(item.quantity*item.price),0)
+             let customerName = 'Guest'; // Default
+             if(order.userId){
+                try {
+                    const user = await this.userRepository.findById(order.userId);
+                    if (user) {
+                        customerName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                        if (!customerName) { 
+                            customerName = user.email || 'Unknown User';
+                        }
+                    } else {
+                        customerName 
+                    }
+                } catch (e) {
+                        console.warn(`Could not find user for ID ${order.userId}:`, e);
+                        customerName = 'Error Fetching User'; 
+                }
+             }
+             recentOrderSummaries.push({
+                id: order.id,
+                customerName: customerName,
+                totalAmount: totalAmount,
+                status: order.status, // Status ko map kiya gaya hai
+                createdAt: order.createdAt,
+            });
+        }
+        return recentOrderSummaries;
     }
     async getTopSellingProducts(take: number=5): Promise<TopProductData[]> {
         const topProductsRaw= await prisma.orderItem.groupBy({
@@ -133,5 +189,35 @@ export class DashboardRepository implements IDashboardRepository{
             orderBy:{stock:'asc'}
         })
     }
+    async getHistoricalGrowthData(periods: number = 6): Promise<GrowthDataPoint[]> {
+    const historicalData: GrowthDataPoint[] = [];
+    const now = new Date();
+
+    for (let i = 0; i < periods; i++) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0); // Last day of the current month being iterated
+
+      const periodData = await prisma.order.aggregate({
+        _sum: { total: true },
+        _count: { id: true },
+        where: {
+          createdAt: {
+            gte: monthStart,
+            lte: monthEnd,
+          },
+        },
+      });
+
+      const monthName = new Date(now.getFullYear(), now.getMonth() - i, 1).toLocaleString('en-US', { month: 'short', year: '2-digit' });
+
+      historicalData.unshift({ // Add to the beginning to keep chronological order
+        period: monthName,
+        revenue: periodData._sum.total || 0,
+        orders: periodData._count.id || 0,
+      });
+    }
+
+    return historicalData;
+  }
 
 }

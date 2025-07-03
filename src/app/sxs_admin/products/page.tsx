@@ -16,9 +16,8 @@ export default async function AdminProductListPage() {
 
   try {
     products = await getAllProductsUseCase.execute();
-  } catch (err: any) {
-    console.error("Error fetching products for admin list:", err);
-    error = err.message || 'Failed to load products.';
+  } catch (err) {
+    error = 'Failed to load products.';
   }
 
   return (

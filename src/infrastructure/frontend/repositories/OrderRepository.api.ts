@@ -81,6 +81,21 @@ const parseOrderEntity = (data: any): orderEntity => {
 };
 
 export class OrderApiRepository implements IOrderRepository {
+    async findAll(): Promise<orderEntity[]> {
+        const response = await fetch(`/api/orders/all`, {
+            method: 'GET',
+            headers: getCommonHeaders(),
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch all orders.');
+        }
+
+        const data = await response.json();
+        return data.orders.map((order: any) => parseOrderEntity(order));
+    }
 
     async createOrder(cartData: CartEntity, orderDetails:Omit<CreateOrderDto,'cartId'>): Promise<orderEntity> {
         const payload: CreateOrderDto = {
@@ -173,20 +188,21 @@ export class OrderApiRepository implements IOrderRepository {
     }
 
     async updateOrder(orderId: string, data: UpdateOrderDto): Promise<orderEntity | null> {
-        const response = await fetch(`/api/orders/${orderId}`, { 
-            method: 'PUT', 
-            headers: getCommonHeaders(),
-            credentials: 'include',
-            body: JSON.stringify(data),
-        });
+    // CHANGE: URL ko query parameter use karne ke liye update kiya gaya hai
+    const response = await fetch(`/api/orders/${orderId}`, { 
+        method: 'PUT', 
+        headers: getCommonHeaders(),
+        credentials: 'include',
+        body: JSON.stringify(data),
+    });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Failed to update order ${orderId}.`);
-        }
-        const responseData = await response.json();
-        return parseOrderEntity(responseData.order);
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to update order ${orderId}.`);
     }
+    const responseData = await response.json();
+    return parseOrderEntity(responseData.order);
+}
 
     async deleteOrder(orderId: string): Promise<boolean> {
         const response = await fetch(`/api/orders/single?orderId=${orderId}`, {

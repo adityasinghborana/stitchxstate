@@ -8,6 +8,7 @@ export interface IOrderRepository{
     createOrder(cartData:any,orderDetails:any):Promise<orderEntity>;
     findById(orderId:string):Promise<orderEntity |null>
     findByUserId(userId: string): Promise<orderEntity[]>;
+    findAll(): Promise<orderEntity[]>;
     updateOrder(orderId: string, data:UpdateOrderDto): Promise<orderEntity | null>;
     deleteOrder(orderId: string): Promise<boolean>;
     createOrderFromProduct(
@@ -97,7 +98,26 @@ export class OrderRepository implements IOrderRepository {
         
         return this.mapPrismaOrderToOrderEntity(order);
     }
-
+    async findAll(): Promise<orderEntity[]> {
+        const orders = await prisma.order.findMany({
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                orderItems: {
+                    include: {
+                        productVariation: {
+                            include: {
+                                images: true,
+                                product: true
+                            }
+                        }
+                    }
+                },
+            }
+        });
+        return orders.map(order => this.mapPrismaOrderToOrderEntity(order));
+    }
     async findById(orderId: string): Promise<orderEntity | null> {
         const order = await prisma.order.findUnique({
             where: { id: orderId },

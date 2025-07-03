@@ -17,15 +17,15 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Invalid cartItemId or quantity" }, { status: 400 });
     }
     dto = body;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   try {
     const cart = await cartUsecases.updateCartItem(dto);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }
 
@@ -40,14 +40,14 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Invalid cartItemId" }, { status: 400 });
     }
     dto = body;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   try {
     const cart = await cartUsecases.removeCartItem(dto);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }

@@ -10,8 +10,9 @@ import { useSearchParams,useRouter } from "next/navigation"
 import { PaymentMethodType,CreateOrderDto,UpdateOrderDto,BuyNowDto } from "@/core/dtos/Order.dto"
 import { ProductApiRepository } from "@/infrastructure/frontend/repositories/ProductRepository.api"
 import { getCurrentUser } from "@/lib/auth"
+import { Suspense } from 'react'
 
-const CheckoutPage= ()=>{
+function CheckoutPageContent() {
     const router=useRouter();
     const searchParams=useSearchParams();
     const flowType=searchParams.get('type');
@@ -258,7 +259,7 @@ const CheckoutPage= ()=>{
     if (itemsToDisplay.length === 0) {
         return (
             <div className="p-8 text-center text-gray-500">
-                <p>No items found for checkout. Please add items to your cart or choose "Buy Now" for a product.</p>
+                <p>No items found for checkout. Please add items to your cart or choose &quot;Buy Now&quot; for a product.</p>
                 <Button onClick={() => router.push('/products')} className="mt-4 bg-blue-500 hover:bg-blue-600 text-white">Continue Shopping</Button>
             </div>
         );
@@ -483,4 +484,11 @@ const CheckoutPage= ()=>{
         </div>
     )
 }
-export default CheckoutPage;
+
+export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckoutPageContent />
+    </Suspense>
+  );
+}

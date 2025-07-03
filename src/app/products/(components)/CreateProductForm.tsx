@@ -41,9 +41,9 @@ export function CreateProductForm() {
       router.refresh();
       // ---
       
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      setError(err.message);
+
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setSubmitting(false);
     }

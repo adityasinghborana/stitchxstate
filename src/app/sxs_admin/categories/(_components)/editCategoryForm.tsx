@@ -78,8 +78,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
       const newUrl = data.url;
 
       setNewlyUploadedImageUrl(newUrl); // Store this as the potential new image for the category
-      // setSuccessMessage('Image uploaded successfully to local server! Click "Update Category" to save changes.');
-      setSuccessMessage('Image uploaded. Click "Update Category" to save changes.'); // Better message
+      // setSuccessMessage('Image uploaded successfully to local server! Click &quot;Update Category&quot; to save changes.');
+      setSuccessMessage('Image uploaded. Click &quot;Update Category&quot; to save changes.'); // Better message
       setSelectedFile(null);
       setImagePreviewUrl(null);
     } catch (err) {
@@ -137,14 +137,14 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error! </strong>
-          <span className="block sm:inline">{error}</span>
+          <span className="block sm:inline">&quot;{error}&quot;</span>
         </div>
       )}
 
       {successMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Success! </strong>
-          <span className="block sm:inline">{successMessage}</span>
+          <span className="block sm:inline">&quot;{successMessage}&quot;</span>
         </div>
       )}
 
@@ -211,7 +211,7 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
         <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 text-center">
           <h4 className="text-base font-semibold text-gray-800 mb-2">New Image Preview:</h4>
           <img src={imagePreviewUrl} alt="New Image Preview" className="max-w-full h-auto mx-auto rounded-md shadow-sm" style={{ maxWidth: '250px', maxHeight: '250px', objectFit: 'contain' }} />
-          <p className="text-xs text-gray-500 mt-2">This is a local preview of the file you selected. Click "Upload New Image Locally" to stage it for replacement.</p>
+          <p className="text-xs text-gray-500 mt-2">This is a local preview of the file you selected. Click &quot;Upload New Image Locally&quot; to stage it for replacement.</p>
         </div>
       )}
 
@@ -222,7 +222,7 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
             {newlyUploadedImageUrl}
           </a>
           <img src={newlyUploadedImageUrl} alt="Newly Uploaded Category Image" className="mt-2 max-w-full h-auto mx-auto rounded-md shadow-sm" style={{ maxWidth: '250px', maxHeight: '250px', objectFit: 'contain' }} />
-          <p className="text-xs text-gray-600 mt-2">This new image has been uploaded to the server. Click "Update Category" to replace the current image with this one.</p>
+          <p className="text-xs text-gray-600 mt-2">This new image has been uploaded to the server. Click &quot;Update Category&quot; to replace the current image with this one.</p>
           <button
             type="button"
             onClick={() => {

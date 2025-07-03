@@ -29,47 +29,29 @@ const BlackFridayHero = ({ homepageSection }: Props) => {
   });
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     const calculateTimeLeft = () => {
       const countdownTo = timerSection?.countdownTo;
-
       if (!countdownTo) {
-        // If no countdownTo date is provided, stop the timer
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
-        clearInterval(interval);
         return;
       }
-
-      const targetDate = new Date(countdownTo).getTime(); 
-      const now = new Date().getTime(); // Current time in milliseconds
-      const difference = targetDate - now; // Difference in milliseconds
-
+      const targetDate = new Date(countdownTo).getTime();
+      const now = new Date().getTime();
+      const difference = targetDate - now;
       if (difference <= 0) {
-        // If the countdown has ended
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
-        clearInterval(interval); // Stop the interval
         return;
       }
-
-      // Calculate time remaining
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
       setTimeLeft({ days, hours, minutes, seconds, isExpired: false });
     };
-
-    // Call calculateTimeLeft immediately to set initial values
     calculateTimeLeft();
-
-    // Set up the interval to update the countdown every second
-    interval = setInterval(calculateTimeLeft, 1000);
-
-  
+    const interval = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(interval);
-  }, [timerSection]); 
+  }, [timerSection]);
 
 
   if (!timerSection || timeLeft.isExpired) {

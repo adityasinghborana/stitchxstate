@@ -108,7 +108,7 @@ const PromoGridEditor = ({
             required
             className="mt-1"
           />
-          <p className="text-xs text-gray-500 mt-1">e.g., "50% OFF" or "SAVE $20"</p>
+          <p className="text-xs text-gray-500 mt-1">e.g., &quot;50% OFF&quot; or &quot;SAVE $20&quot;</p>
         </div>
         <ImageUploadPreview
           label="Image 1 URL (Left Promo)"
@@ -153,7 +153,7 @@ const PromoGridEditor = ({
             onChange={(e) => handlePromoChange('promoLeft', 'ctaText', e.target.value)}
             className="mt-1"
           />
-          <p className="text-xs text-gray-500 mt-1">Call to Action text (e.g., "Shop Now")</p>
+          <p className="text-xs text-gray-500 mt-1">Call to Action text (e.g., &quot;Shop Now&quot;)</p>
         </div>
       </div>
 
@@ -170,7 +170,7 @@ const PromoGridEditor = ({
             required
             className="mt-1"
           />
-          <p className="text-xs text-gray-500 mt-1">e.g., "30% OFF" or "NEW ARRIVALS"</p>
+          <p className="text-xs text-gray-500 mt-1">e.g., &quot;30% OFF&quot; or &quot;NEW ARRIVALS&quot;</p>
         </div>
         <ImageUploadPreview
           label="Image 1 URL (Right Promo)"
@@ -215,7 +215,7 @@ const PromoGridEditor = ({
             onChange={(e) => handlePromoChange('promoRight', 'ctaText', e.target.value)}
             className="mt-1"
           />
-          <p className="text-xs text-gray-500 mt-1">Call to Action text (e.g., "Explore More")</p>
+          <p className="text-xs text-gray-500 mt-1">Call to Action text (e.g., &quot;Explore More&quot;)</p>
         </div>
       </div>
     </div>

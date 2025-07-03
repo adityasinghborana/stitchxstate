@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `cart` ADD COLUMN `totalAmount` DOUBLE NOT NULL DEFAULT 0,
-    ADD COLUMN `totalItems` INTEGER NOT NULL DEFAULT 0;

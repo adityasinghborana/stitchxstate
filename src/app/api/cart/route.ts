@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
   try {
     const cart = await cartUsecases.getCart(userId);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }
 
@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
   try {
     const cart = await cartUsecases.getOrCreateCart(userId);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }
 
@@ -39,7 +39,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const cart = await cartUsecases.clearCart(userId);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 400 });
   }
 }

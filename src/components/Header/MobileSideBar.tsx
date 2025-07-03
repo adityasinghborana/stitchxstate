@@ -21,7 +21,6 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, header }) => {
   const section = header?.sections?.[0];
-  if (!section) return null;
 
   // Lock body scroll when menu is open
   useEffect(() => {
@@ -34,6 +33,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, header }) => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  if (!section) return null;
 
   return (
     <>

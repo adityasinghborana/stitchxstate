@@ -38,17 +38,15 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ orders }, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching all orders:', error);
-        
-        if (error.message.includes('Unauthorized')) {
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
             return NextResponse.json({ message: error.message }, { status: 403 }); // Forbidden
         }
-        
         return NextResponse.json(
             {
                 message: 'Failed to fetch all orders.',
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
             },
             { status: 500 }
         );

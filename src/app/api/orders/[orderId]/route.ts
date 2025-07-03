@@ -44,15 +44,15 @@ export async function DELETE(req: NextRequest) {
         } else {
             return NextResponse.json({ message: `Failed to delete order ${orderId}.` }, { status: 500 });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error deleting order:', error);
-        if (error.message.includes('Unauthorized')) {
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
             return NextResponse.json({ message: error.message }, { status: 403 }); // Forbidden
         }
         return NextResponse.json(
             {
                 message: 'Failed to delete order.',
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
             },
             { status: 500 }
         );
@@ -82,18 +82,18 @@ export async function GET(req: NextRequest) {
         const order = await orderUseCase.getOrderDetail(orderId, userId);
 
         return NextResponse.json({ order }, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching order details:', error);
-        if (error.message.includes('Order not found')) {
+        if (error instanceof Error && error.message.includes('Order not found')) {
             return NextResponse.json({ message: error.message }, { status: 404 }); // Not Found
         }
-        if (error.message.includes('Unauthorized access')) {
+        if (error instanceof Error && error.message.includes('Unauthorized access')) {
             return NextResponse.json({ message: error.message }, { status: 403 }); // Forbidden
         }
         return NextResponse.json(
             {
                 message: 'Failed to fetch order details.',
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
             },
             { status: 500 }
         );
@@ -129,18 +129,18 @@ export async function PUT(req: NextRequest) {
             return NextResponse.json({ message: `Failed to update order ${orderId}.` }, { status: 500 });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error updating order:', error);
-        if (error.message.includes('Unauthorized')) {
+        if (error instanceof Error && error.message.includes('Unauthorized')) {
             return NextResponse.json({ message: error.message }, { status: 403 });
         }
-        if (error.message.includes('Order not found')) {
+        if (error instanceof Error && error.message.includes('Order not found')) {
             return NextResponse.json({ message: error.message }, { status: 404 });
         }
         return NextResponse.json(
             {
                 message: 'Failed to update order.',
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
             },
             { status: 500 }
         );

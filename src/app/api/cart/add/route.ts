@@ -24,15 +24,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid input data" }, { status: 400 });
     }
     dto = body;
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   try {
     const cart = await cartUsecases.addToCart(dto, userId);
     return NextResponse.json(cart, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 

@@ -57,8 +57,6 @@ const AdminLoginPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
-            <script src="https://cdn.tailwindcss.com"></script>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
             <style>
                 {`
                 body {

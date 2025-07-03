@@ -41,20 +41,23 @@ export async function POST(req: NextRequest) {
             },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error processing buy now:', error);
-        if (error.message.includes('Product not found') || error.message.includes('Insufficient stock')) {
-            return NextResponse.json({ message: error.message }, { status: 400 });
+        if (error instanceof Error) {
+            if (error.message.includes('Product not found') || error.message.includes('Insufficient stock')) {
+                return NextResponse.json({ message: error.message }, { status: 400 });
+            }
+            if (error.message.includes('Payment failed')) {
+                return NextResponse.json({ message: error.message }, { status: 402 });
+            }
+            return NextResponse.json(
+                {
+                    message: 'Failed to process buy now.',
+                    error: error.message,
+                },
+                { status: 500 }
+            );
         }
-        if (error.message.includes('Payment failed')) {
-            return NextResponse.json({ message: error.message }, { status: 402 });
-        }
-        return NextResponse.json(
-            {
-                message: 'Failed to process buy now.',
-                error: error.message,
-            },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: 'Failed to process buy now.', error: 'Unknown error' }, { status: 500 });
     }
 }

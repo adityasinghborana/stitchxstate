@@ -14,6 +14,7 @@
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const categoryRepository = new CategoryApiRepository();
     const imageRepository = new ImageApiRepository(); // This now targets your Next.js API route
@@ -108,7 +109,14 @@
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <strong className="font-bold">Error! </strong>
-            <span className="block sm:inline">{error}</span>
+            <span className="block sm:inline">&quot;{error}&quot;</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Success! </strong>
+            <span className="block sm:inline">&quot;{successMessage}&quot;</span>
           </div>
         )}
 
@@ -155,7 +163,7 @@
           <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 text-center">
             <h4 className="text-base font-semibold text-gray-800 mb-2">Image Preview:</h4>
             <img src={imagePreviewUrl} alt="Image Preview" className="max-w-full h-auto mx-auto rounded-md shadow-sm" style={{ maxWidth: '250px', maxHeight: '250px', objectFit: 'contain' }} />
-            <p className="text-xs text-gray-500 mt-2">This is a local preview. Click "Upload Image Locally" to save it.</p>
+            <p className="text-xs text-gray-500 mt-2">This is a local preview. Click &quot;Upload Image Locally&quot; to save it.</p>
           </div>
         )}
 

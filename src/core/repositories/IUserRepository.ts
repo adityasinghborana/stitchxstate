@@ -1,66 +1,52 @@
 import prisma from "@/lib/prisma";
 import { UserEntity } from "../entities/User.entity";
-import { CreateUserDto,UpdateUserDto,userResponseDto ,LoginResponseDto,RequestOtpDto,VerifyOtpDto} from "../dtos/User.dto";
+import { CreateUserDto, UpdateUserDto, LoginResponseDto } from "../dtos/User.dto";
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
 
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not defined");
 }
 const JWT_SECRET = process.env.JWT_SECRET;
-const OTP_EXPIRY_MINUTES =5; // otp valid for 5 minutes after five minutes it will expires
-
-
-
-// configure nodemailer transporter for sending email otp
-const transporter = nodemailer.createTransport({
-  host:'smtp.gmail.com',
-  port:587,
-  secure:false,
-  auth:{
-    user:process.env.EMAIL_USER,  //your sending email address 
-    pass:process.env.EMAIL_PASS, //your email password or app specific password
-  },
-});
+const OTP_EXPIRY_MINUTES = 5; // otp valid for 5 minutes after five minutes it will expires
 
 export interface IUserRepository {
     findAll(): Promise<UserEntity[]>;
-    findById(id:String):Promise<UserEntity |null>;
-    create(userData:CreateUserDto):Promise<UserEntity>;
-    update(id:String, data :Partial<UpdateUserDto>):Promise<UserEntity>;
-    delete(id:String):Promise<void>
-    findByEmail(email:String):Promise<UserEntity |null>;
-    requestOtp(email:string):Promise<UserEntity |null>;
-    verifyOtpAndLogin(email:string,otp:string):Promise<LoginResponseDto>;
+    findById(id: string): Promise<UserEntity | null>;
+    create(userData: CreateUserDto): Promise<UserEntity>;
+    update(id: string, data: Partial<UpdateUserDto>): Promise<UserEntity>;
+    delete(id: string): Promise<void>;
+    findByEmail(email: string): Promise<UserEntity | null>;
+    requestOtp(email: string): Promise<{ user: UserEntity, otp: string } | null>;
+    verifyOtpAndLogin(email: string, otp: string): Promise<LoginResponseDto>;
 }
 export class PrismaUserRepository implements IUserRepository {
-  private mapPrismaUserToUserEntity(prismaUser: any): UserEntity {
+  private mapPrismaUserToUserEntity(prismaUser: Record<string, unknown>): UserEntity {
     return new UserEntity(
-      prismaUser.id,
-      prismaUser.firstName,
-      prismaUser.lastName,
-      prismaUser.email,
-      prismaUser.password, // This is the HASHED password from the DB
-      prismaUser.createdAt,
-      prismaUser.updatedAt,
-      prismaUser.isAdmin,
-      prismaUser.phone || undefined,
-      prismaUser.otp ||null,
-      prismaUser.otpExpiresAt ||null
+      prismaUser.id as string,
+      prismaUser.firstName as string,
+      prismaUser.lastName as string,
+      prismaUser.email as string,
+      prismaUser.password as string, // This is the HASHED password from the DB
+      prismaUser.createdAt as Date,
+      prismaUser.updatedAt as Date,
+      prismaUser.isAdmin as boolean,
+      (prismaUser.phone as string) || undefined,
+      (prismaUser.otp as string) || null,
+      (prismaUser.otpExpiresAt as Date) || null
     );
   }
 
   async findAll(): Promise<UserEntity[]> {
     const prismaUsers = await prisma.user.findMany();
-    return prismaUsers.map(this.mapPrismaUserToUserEntity);
+    return prismaUsers.map(u => this.mapPrismaUserToUserEntity(u as Record<string, unknown>));
   }
 
   async findById(id: string): Promise<UserEntity | null> {
     const prismaUser = await prisma.user.findUnique({
       where: { id },
     });
-    return prismaUser ? this.mapPrismaUserToUserEntity(prismaUser) : null;
+    return prismaUser ? this.mapPrismaUserToUserEntity(prismaUser as Record<string, unknown>) : null;
   }
 
   async create(userData: CreateUserDto): Promise<UserEntity> {
@@ -76,7 +62,7 @@ export class PrismaUserRepository implements IUserRepository {
         isAdmin: userData.isAdmin ?? false,
       },
     });
-    return this.mapPrismaUserToUserEntity(createdPrismaUser);
+    return this.mapPrismaUserToUserEntity(createdPrismaUser as Record<string, unknown>);
   }
 
   async update(id: string, updateData: Partial<UpdateUserDto>): Promise<UserEntity> {
@@ -90,7 +76,7 @@ export class PrismaUserRepository implements IUserRepository {
       where: { id },
       data: dataToUpdate,
     });
-    return this.mapPrismaUserToUserEntity(updatedPrismaUser);
+    return this.mapPrismaUserToUserEntity(updatedPrismaUser as Record<string, unknown>);
   }
 
   async delete(id: string): Promise<void> {
@@ -103,35 +89,31 @@ export class PrismaUserRepository implements IUserRepository {
     const prismaUser = await prisma.user.findUnique({
       where: { email },
     });
-    return prismaUser ? this.mapPrismaUserToUserEntity(prismaUser) : null;
+    return prismaUser ? this.mapPrismaUserToUserEntity(prismaUser as Record<string, unknown>) : null;
     
   }
 
-  async requestOtp(email: string): Promise<UserEntity |null> {
+  async requestOtp(email: string): Promise<{ user: UserEntity, otp: string } | null> {
     let user = await this.findByEmail(email);// Try to find user
     if(!user){
-      console.log(`User not found for email: ${email}. Creating new user.`);
       try{
         const newUserPrisma = await prisma.user.create({
           data:{
             email:email,
             isAdmin:false,
-            firstName: '', // Provide a default empty string or null if nullable
-            lastName: '',  // Provide a default empty string or null if nullable
-            password: '', 
+            firstName: '',
+            lastName: '',
+            password: '',
           },
         });
-        user= this.mapPrismaUserToUserEntity(newUserPrisma);
-        console.log(`new user is created ${email}`);
-      }catch(error){
-        console.error(`Error creating new user for email :${email}`,error);
+        user= this.mapPrismaUserToUserEntity(newUserPrisma as Record<string, unknown>);
+      }catch {
         return null;
       }
     }
-    const otp = Math.floor(100000+Math.random()*900000).toString(); // it generate the 6 digit otp
-    const otpExpiresAt = new Date(Date.now()+OTP_EXPIRY_MINUTES*60*1000); //otp expire minutes from now
+    const otp = Math.floor(100000+Math.random()*900000).toString();
+    const otpExpiresAt = new Date(Date.now()+OTP_EXPIRY_MINUTES*60*1000);
     try {
-      //save otp  and expiry  to the user record
       await prisma.user.update({
         where:{id:user.id},
         data:{
@@ -139,22 +121,11 @@ export class PrismaUserRepository implements IUserRepository {
           otpExpiresAt:otpExpiresAt
         }
       });
-      //send otp by email
-      await transporter.sendMail({
-        from:process.env.EMAIL_USER, //sender address
-        to:user.email,
-        subject:'you login otp',
-        text:`your one time password (otp) is :${otp}it is valid for ${OTP_EXPIRY_MINUTES} minutes`,
-        html:`<b>Your One-Time Password (OTP) is: ${otp}</b>.<br>It is valid for ${OTP_EXPIRY_MINUTES} minutes.`
-      })
-      console.log(`otp send successfully ${user.email}`);
-      return user;
-    } catch (error) {
-       console.error('Error sending OTP email or saving to DB:', error);
-            return null;
-        }
+      return { user, otp };
+    } catch {
+      return null;
+    }
   }
-
 
   async verifyOtpAndLogin(email: string, otp: string): Promise<LoginResponseDto> {
       const user = await this.findByEmail(email);

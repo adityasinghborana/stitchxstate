@@ -22,20 +22,22 @@ export async function POST(request:Request){
         })
         return response;
     }
-    catch(error:any){
+    catch(error: unknown){
         console.error("Error during otp verification and login ",error);
         let errorMessage = 'Login failed. Please try again.';
         let statusCode = 401; // Default to Unauthorized
 
-        if (error.message.includes('Invalid email or OTP.')) {
-            errorMessage = 'Invalid email or OTP. Please check your credentials.';
-        } else if (error.message.includes('OTP has expired.')) {
-            errorMessage = 'Your OTP has expired. Please request a new one.';
-            statusCode = 403; // Forbidden
-        } else if (error.message.includes('Invalid OTP.')) {
-            errorMessage = 'The OTP you entered is incorrect. Please try again.';
+        if (error instanceof Error) {
+            if (error.message.includes('Invalid email or OTP.')) {
+                errorMessage = 'Invalid email or OTP. Please check your credentials.';
+            } else if (error.message.includes('OTP has expired.')) {
+                errorMessage = 'Your OTP has expired. Please request a new one.';
+                statusCode = 403; // Forbidden
+            } else if (error.message.includes('Invalid OTP.')) {
+                errorMessage = 'The OTP you entered is incorrect. Please try again.';
+            }
+            return NextResponse.json({ message: errorMessage }, { status: statusCode });
         }
-
         return NextResponse.json({ message: errorMessage }, { status: statusCode });
     }
 }

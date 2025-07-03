@@ -4,16 +4,9 @@ import React from 'react';
 import { getProductByIdUSeCase } from '@/core/usecases/GetProductById.usecase';
 import { ProductApiRepository } from '@/infrastructure/frontend/repositories/ProductRepository.api';
 import SingleProductCard from '../(components)/SingleProductCard';
-import { getCurrentUser } from '@/lib/auth';
 
-interface ProductPageProps {
-  params: {
-    id: string;
-  };
-}
-
-const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
-  const productId = params.id;
+const ProductPage: React.FC<{ params: Promise<{ id: string }> }> = async ({ params }) => {
+  const { id: productId } = await params;
   const productRepository = new ProductApiRepository();
   const getProductUseCase = new getProductByIdUSeCase(productRepository);
 

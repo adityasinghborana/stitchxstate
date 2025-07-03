@@ -84,7 +84,7 @@ export class DashboardRepository implements IDashboardRepository{
                             customerName = user.email || 'Unknown User';
                         }
                     } else {
-                        customerName 
+                        customerName = 'Unknown User';
                     }
                 } catch (e) {
                         console.warn(`Could not find user for ID ${order.userId}:`, e);

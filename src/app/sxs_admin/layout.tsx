@@ -167,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         // Loading state: until authentication check is complete
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
-                <script src="https://cdn.tailwindcss.com"></script>
+               
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <p className="text-xl font-semibold text-gray-700 animate-pulse">Loading admin panel...</p>
             </div>
@@ -182,7 +182,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 "h-full", // Use h-screen for full height in layout
             )}
         >
-            <script src="https://cdn.tailwindcss.com"></script>
+         
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
             <style>
                 {`

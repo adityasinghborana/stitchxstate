@@ -35,6 +35,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, isProcessing, che
 
     const handleFormSubmission = (data: CheckoutFormValues) => {
         const payload: Omit<CreateOrderDto, 'cartId'> = {
+            userId: '', // Placeholder, should be set by parent or context
+            items: [], // Placeholder, should be set by parent or context
             shippingAddress: {
                 firstName: data.firstName,
                 lastName: data.lastName,

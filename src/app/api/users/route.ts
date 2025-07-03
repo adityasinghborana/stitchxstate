@@ -3,7 +3,7 @@ import { PrismaUserRepository } from '@/core/repositories/IUserRepository';
 import { GetAllUsersUseCase } from '@/core/usecases/GetAllUser.usecase';
 import { CreateUserUseCase } from '@/core/usecases/CreateUser.usecase';
 import { CreateUserDto } from '@/core/dtos/User.dto';
-import { GetUserByIdUseCase } from '@/core/usecases/GetUserById.usecase';
+
 
 const userRepository = new PrismaUserRepository();
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
@@ -13,9 +13,9 @@ export async function GET() {
   try {
     const users = await getAllUsersUseCase.execute();
     return NextResponse.json(users, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching users:', error);
-    return NextResponse.json({ message: 'Failed to fetch users', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to fetch users', error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -29,11 +29,11 @@ export async function POST(request: Request) {
 
     const newUser = await createUserUseCase.execute(body);
     return NextResponse.json(newUser, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating user:', error);
-    if (error.message.includes('email already exists')) {
+    if (error instanceof Error && error.message.includes('email already exists')) {
       return NextResponse.json({ message: error.message }, { status: 409 });
     }
-    return NextResponse.json({ message: 'Failed to create user', error: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Failed to create user', error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

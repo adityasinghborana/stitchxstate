@@ -26,11 +26,10 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         // over 404 for "no results found" in a collection.
         return NextResponse.json(products, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching products by category ID:', error);
-        // Provide a more specific error message than "failed to fetch user"
         return NextResponse.json(
-            { message: "Failed to fetch products for category", error: error.message },
+            { message: "Failed to fetch products for category", error: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
     }

@@ -20,7 +20,7 @@ export async function GET() {
     // 4. Return the data in the required format
     return NextResponse.json(products);
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to fetch products:", error); // Keep logging for observability
     return NextResponse.json(
       { message: "An error occurred while fetching products." },
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     // 4. Return a success response
     return NextResponse.json(newProduct, { status: 201 }); // 201 Created
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to create product:", error);
     
     // Handle potential validation errors from the use case

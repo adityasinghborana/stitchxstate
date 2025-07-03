@@ -24,9 +24,9 @@ export async function GET(
             return NextResponse.json({message:"Product not found"},{status:404});
         }
         return NextResponse.json(category,{status:200})
-    } catch (error:any) {
-        console.error('error fetching by product by id:',error);
-        return NextResponse.json({message:"failed to fetch user",error:error.message},{status:500});
+    } catch (error: unknown) {
+        console.error('error fetching by product by id:', error);
+        return NextResponse.json({ message: "failed to fetch user", error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }
 
@@ -43,9 +43,9 @@ export async function PUT(request:Request, props:{ params: Promise<{ id: string 
             return NextResponse.json({ message: "Product not found" }, { status: 404 }); // Corrected message
         }
          return NextResponse.json(updatedProduct, { status: 200 });
-    } catch(error:any){
-        console.error('error updating user ',error);
-        return NextResponse.json({message:'Failed  to update user ',error:error.message},{status:500});
+    } catch(error: unknown){
+        console.error('error updating user ', error);
+        return NextResponse.json({ message: 'Failed  to update user ', error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }
 
@@ -63,8 +63,8 @@ export async function DELETE(
             return NextResponse.json({ message: 'product  not found' }, { status: 404 });
         }
         return NextResponse.json({message:"product deleted successfully"},{status:200});
-    } catch (error:any) {
+    } catch (error:unknown) {
         console.error('Error deleting user:', error);
-        return NextResponse.json({ message: 'Failed to delete user', error: error.message }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to delete user', error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }

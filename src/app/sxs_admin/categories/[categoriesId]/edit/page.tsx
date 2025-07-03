@@ -3,13 +3,7 @@ import { getCategoryByIdUSeCase } from '@/core/usecases/GetCategoryById.usecase'
 import { CategoryEditForm } from '../../(_components)/editCategoryForm';
 import { notFound } from 'next/navigation'; 
 
-interface CategoryEditPageProps {
-  params: {
-    categoriesId: string; 
-  };
-}
-
-export default async function CategoryEditPage({ params }: CategoryEditPageProps) {
+export default async function CategoryEditPage({ params }: { params: Promise<{ categoriesId: string }> }) {
   const { categoriesId } = await params; 
   const categoryIdToUse = categoriesId;
   const categoryRepository = new CategoryRepository();

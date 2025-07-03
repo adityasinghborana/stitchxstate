@@ -35,7 +35,19 @@ const Header = ({ header }: HeaderProps) => {
   const handleCartToggle = () => {
     setIsCartOpen(!isCartOpen);
   };
-  const section=header.sections[0]
+  const section = header.sections[0];
+  if (!section) {
+    return (
+      <header className="font-sans">
+        <div className="bg-orange-200 text-center text-xs py-1">
+          <span className="font-semibold">HASSLE-FREE RETURNS</span> 30-day postage paid returns
+        </div>
+        <div className="text-center text-gray-500 py-8">
+          No header content available.
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="font-sans">
@@ -48,7 +60,7 @@ const Header = ({ header }: HeaderProps) => {
       <div className="hidden md:flex border-b border-gray-100 px-6 py-3 justify-between items-center text-sm">
         {/* Left Navigation (Desktop only) */}
         <div className="flex ml-[12%] space-x-4">
-          {section.mainNavlinks.map((link, index) => (
+          {(section.mainNavlinks ?? []).map((link, index) => (
             <Link key={index} href={link.url}>
               <span className="hover:underline cursor-pointer">{link.label}</span>
             </Link>
@@ -57,7 +69,7 @@ const Header = ({ header }: HeaderProps) => {
 
         {/* Social & Location (Desktop only) */}
         <div className="flex items-center space-x-3 mr-[12%]">
-          {section.socialIcons.map((icon, index) => (
+          {(section.socialIcons ?? []).map((icon, index) => (
             <Link key={index} href={icon.url}>
               <span className="text-xl text-gray-700 hover:text-blue-600">
                 {iconMap[icon.iconName] || null}
@@ -81,21 +93,29 @@ const Header = ({ header }: HeaderProps) => {
 
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex flex-grow justify-center space-x-8 text-gray-700 font-medium text-sm">
-          <Link href={section.mainNav.shop.url} className="hover:text-blue-600 transition-colors duration-200">
-            {section.mainNav.shop.label}
-          </Link>
-          <Link href={section.mainNav.season.url} className="hover:text-blue-600 transition-colors duration-200">
-            {section.mainNav.season.label}
-          </Link>
+          {section.mainNav && section.mainNav.shop && (
+            <Link href={section.mainNav.shop.url} className="hover:text-blue-600 transition-colors duration-200">
+              {section.mainNav.shop.label}
+            </Link>
+          )}
+          {section.mainNav && section.mainNav.season && (
+            <Link href={section.mainNav.season.url} className="hover:text-blue-600 transition-colors duration-200">
+              {section.mainNav.season.label}
+            </Link>
+          )}
           <Link href="/" className="font-bold text-gray-900 text-xl whitespace-nowrap">
             {section.logo || "STITCH X STATE"}
           </Link>
-          <Link href={section.mainNav.journal.url} className="hover:text-blue-600 transition-colors duration-200">
-            {section.mainNav.journal.label}
-          </Link>
-          <Link href={section.mainNav.themeFeatures.url} className="hover:text-blue-600 transition-colors duration-200">
-            {section.mainNav.themeFeatures.label}
-          </Link>
+          {section.mainNav && section.mainNav.journal && (
+            <Link href={section.mainNav.journal.url} className="hover:text-blue-600 transition-colors duration-200">
+              {section.mainNav.journal.label}
+            </Link>
+          )}
+          {section.mainNav && section.mainNav.themeFeatures && (
+            <Link href={section.mainNav.themeFeatures.url} className="hover:text-blue-600 transition-colors duration-200">
+              {section.mainNav.themeFeatures.label}
+            </Link>
+          )}
         </div>
 
         {/* Right-aligned icons (Search, User, Shopping Bag) */}

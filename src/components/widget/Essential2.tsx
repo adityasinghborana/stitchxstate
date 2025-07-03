@@ -19,9 +19,9 @@ const App = ({ homepageSection }: Props) => {
   }
 
   const {post1,post2,post3}=blogPostSection;
-  const defaultImage1Url = 'stitchxstate\public\images\Essential2_image1.jpg';
-  const defaultImage2Url = 'stitchxstate\public\images\Essential2_image1.jpg';
-  const defaultImage3Url = 'stitchxstate\public\images\Essential2_image1.jpg';
+  const defaultImage1Url = 'stitchxstate/public/images/Essential2_image1.jpg';
+  const defaultImage2Url = 'stitchxstate/public/images/Essential2_image1.jpg';
+  const defaultImage3Url = 'stitchxstate/public/images/Essential2_image1.jpg';
   const post1title=post1.title ||"May 10, 2018";
   const post1description=post1.description ||"Looks we love";
   const post1image=post1.imageUrl ||defaultImage1Url;

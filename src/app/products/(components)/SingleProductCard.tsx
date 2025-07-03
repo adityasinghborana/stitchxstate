@@ -70,10 +70,10 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product}) => {
   fetchUser();
 }, []);
   useEffect(() => {
-    if (setISSidebarOpen && !cart) { // Fetch cart if sidebar is open and cart is null
+    if (isSidebar && !cart) { // Fetch cart if sidebar is open and cart is null
       getCart();
     }
-  }, [setISSidebarOpen, cart, getCart]);
+  }, [isSidebar, cart, getCart]);
 
   const handleVariationChange = (variation: ProductVariationEntity) => {
     setSelectedVariation(variation);

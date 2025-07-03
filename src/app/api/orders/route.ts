@@ -39,24 +39,27 @@ export async function POST(req: NextRequest) {
             },
             { status: 201 }
         );
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error creating order:', error);
-        if (error.message.includes('Invalid or empty cart') || error.message.includes('Unauthorized access')) {
-            return NextResponse.json({ message: error.message }, { status: 400 }); 
+        if (error instanceof Error) {
+            if (error.message.includes('Invalid or empty cart') || error.message.includes('Unauthorized access')) {
+                return NextResponse.json({ message: error.message }, { status: 400 });
+            }
+            if (error.message.includes('Product variation not found') || error.message.includes('Insufficient stock')) {
+                return NextResponse.json({ message: error.message }, { status: 400 });
+            }
+            if (error.message.includes('Payment failed')) {
+                return NextResponse.json({ message: error.message }, { status: 402 });
+            }
+            return NextResponse.json(
+                {
+                    message: 'Failed to create order.',
+                    error: error.message,
+                },
+                { status: 500 }
+            );
         }
-        if (error.message.includes('Product variation not found') || error.message.includes('Insufficient stock')) {
-            return NextResponse.json({ message: error.message }, { status: 400 });
-        }
-        if (error.message.includes('Payment failed')) {
-            return NextResponse.json({ message: error.message }, { status: 402 });
-        }
-        return NextResponse.json(
-            {
-                message: 'Failed to create order.',
-                error: error.message,
-            },
-            { status: 500 } // Internal Server Error
-        );
+        return NextResponse.json({ message: 'Failed to create order.', error: 'Unknown error' }, { status: 500 });
     }
 }
 export async function GET(req:NextRequest){
@@ -76,12 +79,12 @@ export async function GET(req:NextRequest){
 
         return NextResponse.json({ orders }, { status: 200 });
             
-        } catch (error: any) {
+        } catch (error: unknown) {
         console.error('Error fetching orders:', error);
         return NextResponse.json(
             {
                 message: 'Failed to fetch orders.',
-                error: error.message,
+                error: error instanceof Error ? error.message : 'Unknown error',
             },
             { status: 500 }
         );

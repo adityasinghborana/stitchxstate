@@ -6,13 +6,7 @@ import { CategoryRepository } from '@/core/repositories/ICategoryRepository';
 import ProductGridDisplay from '../(component)/productGripDisplay';
 import Link from 'next/link';
 
-interface ProductByCategoryPageProps {
-  params: {
-    categoryId: string; 
-  };
-}
-
-export default async function ProductByCategoryPage({ params }: ProductByCategoryPageProps) {
+export default async function ProductByCategoryPage({ params }: { params: Promise<{ categoryId: string }> }) {
 
   const { categoryId } = await params;
 

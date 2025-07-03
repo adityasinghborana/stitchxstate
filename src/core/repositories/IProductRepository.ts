@@ -18,6 +18,17 @@ export interface IProductRepository {
     findByProductVariationId(productVariationId: string): Promise<ProductEntity | null>;
 }
 
+// Helper to map nulls to undefined for category SEO fields
+function mapCategoryNullsToUndefined(cat: any) {
+  const { seoTitle, seoDescription, imageUrl, ...rest } = cat;
+  return {
+    ...rest,
+    seoTitle: seoTitle === null ? undefined : seoTitle,
+    seoDescription: seoDescription === null ? undefined : seoDescription,
+    imageUrl: imageUrl === null ? undefined : imageUrl,
+  };
+}
+
 export class ProductRepository implements IProductRepository {
   
   async findAll(): Promise<ProductEntity[]> {
@@ -32,7 +43,10 @@ export class ProductRepository implements IProductRepository {
         galleryImages: true,
       },
     });
-    return products as ProductEntity[];
+    return products.map(product => ({
+      ...product,
+      categories: product.categories.map(mapCategoryNullsToUndefined) as import('../entities/category.entity').CategoryEntity[]
+    })) as ProductEntity[];
   }
 
   async findById(id: string): Promise<ProductEntity | null> {
@@ -49,7 +63,11 @@ export class ProductRepository implements IProductRepository {
       },
     });
     console.log(`ProductRepository.findById result for ${id}:`, product ? 'Found' : 'Not Found', product);
-    return product as ProductEntity | null;
+    if (!product) return null;
+    return {
+      ...product,
+      categories: product.categories.map(mapCategoryNullsToUndefined) as import('../entities/category.entity').CategoryEntity[]
+    } as ProductEntity;
   }
 
   async findByCategoryId(categoryId: string): Promise<ProductEntity[]> {
@@ -79,12 +97,14 @@ export class ProductRepository implements IProductRepository {
 
   async create(productData: CreateProductDTO): Promise<ProductEntity> {
     // Destructure all new fields
-    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages } = productData;
+    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages, seoTitle, seoDescription } = productData;
     
-    const createData: any = { // Consider using Prisma.ProductCreateInput for better type safety
-        name,
-        description,
-        ...(thumbnailVideo !== undefined && thumbnailVideo !== null && { thumbnailVideo }), // Handle null for thumbnailVideo
+    const createData: any = {
+      name,
+      description,
+      ...(thumbnailVideo !== undefined && thumbnailVideo !== null && { thumbnailVideo }),
+      ...(seoTitle !== undefined && { seoTitle }),
+      ...(seoDescription !== undefined && { seoDescription }),
     };
 
     if (categoryIds && categoryIds.length > 0) {
@@ -131,8 +151,8 @@ export class ProductRepository implements IProductRepository {
   }
 
   async update(id: string, productData: CreateProductDTO): Promise<ProductEntity> {
-    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages } = productData;
-    const updateData: any = {}; // Using 'any' for flexibility, but Prisma.ProductUpdateInput is better for type safety.
+    const { name, description, categoryIds, variations, thumbnailVideo, galleryImages, seoTitle, seoDescription } = productData;
+    const updateData: any = {};
 
     // --- Step 1: Update the main product record (General information) ---
     // Update basic product details if they are provided in the request
@@ -145,6 +165,12 @@ export class ProductRepository implements IProductRepository {
     // Update thumbnailVideo: if provided, set it.
     if (thumbnailVideo !== undefined) {
         updateData.thumbnailVideo = thumbnailVideo;
+    }
+    if (seoTitle !== undefined) {
+        updateData.seoTitle = seoTitle;
+    }
+    if (seoDescription !== undefined) {
+        updateData.seoDescription = seoDescription;
     }
 
     // Update categories by setting a new list. This replaces all old categories.

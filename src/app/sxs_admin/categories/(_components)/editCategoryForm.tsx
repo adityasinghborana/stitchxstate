@@ -17,6 +17,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
 
   // Initialize state with data from initialCategory prop
   const [categoryName, setCategoryName] = useState<string>(initialCategory.name || '');
+  const [seoTitle, setSeoTitle] = useState<string>(initialCategory.seoTitle || '');
+  const [seoDescription, setSeoDescription] = useState<string>(initialCategory.seoDescription || '');
   // Now we only manage a single imageUrl string
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(initialCategory.imageUrl || null);
 
@@ -108,6 +110,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
     const categoryData: UpdateCategoryDTO = {
       name: categoryName.trim(),
       imageUrl: imageToSend, // Pass the single image URL
+      seoTitle,
+      seoDescription,
     };
 
     try {
@@ -161,6 +165,31 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
           required
           disabled={isSubmitting}
         />
+      </div>
+
+      <div>
+        <label htmlFor="seoTitle" className="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
+        <input
+          type="text"
+          id="seoTitle"
+          name="seoTitle"
+          value={seoTitle}
+          onChange={e => setSeoTitle(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="SEO Title for this category"
+        />
+      </div>
+      <div>
+        <label htmlFor="seoDescription" className="block text-sm font-medium text-gray-700 mb-1">SEO Description</label>
+        <textarea
+          id="seoDescription"
+          name="seoDescription"
+          value={seoDescription}
+          onChange={e => setSeoDescription(e.target.value)}
+          rows={2}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="SEO Description for this category"
+        ></textarea>
       </div>
 
       {/* Display Current Image (if any) */}

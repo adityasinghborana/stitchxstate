@@ -11,9 +11,13 @@
 export interface CreateCategoryDTO {
   name: string;
   imageUrl?: string; 
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export interface UpdateCategoryDTO {
   name?: string;      
   imageUrl?: string |null;  
+  seoTitle?: string;
+  seoDescription?: string;
 }

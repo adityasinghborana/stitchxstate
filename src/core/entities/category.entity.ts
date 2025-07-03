@@ -1,4 +1,3 @@
-
 // export interface CategoryImageEntity {
 //   id: string;
 //   url: string;
@@ -17,4 +16,6 @@ export interface CategoryEntity {
   name: string;
   createdAt: Date;
   imageUrl?: string |null; 
+  seoTitle?: string;
+  seoDescription?: string;
 }

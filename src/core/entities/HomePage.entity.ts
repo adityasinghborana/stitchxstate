@@ -88,4 +88,6 @@ export interface HomepageEntity{
     sections:HomePageSection[];
     createdAt:Date;
     updatedAt:Date;
+    seoTitle?: string;
+    seoDescription?: string;
 }

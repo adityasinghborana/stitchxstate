@@ -37,4 +37,6 @@ export interface ProductEntity {
   thumbnailVideo: string | null; 
   galleryImages: GalleryImageEntity[]; 
   cartItems?:CartItemEntity[]
+  seoTitle?: string;
+  seoDescription?: string;
 }

@@ -34,6 +34,8 @@ model HomePage{
   sections  Json      //Prisma to store the sections field as a JSON document in your database
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  seoTitle        String?
+  seoDescription  String?
 }
 model Header{
   id        String    @id @default(cuid())
@@ -59,6 +61,8 @@ model Product {
   thumbnailVideo String             @default("")     
   galleryImages  GalleryImage[]
   cartItems      CartItem[]
+  seoTitle        String?
+  seoDescription  String?
 }
 
 model ProductVariation {
@@ -100,6 +104,8 @@ model Category {
   products  Product[] @relation("ProductToCategory")
   createdAt DateTime  @default(now())
   imageUrl    String?
+  seoTitle        String?
+  seoDescription  String?
 }
 
 
@@ -172,4 +178,22 @@ model CartItem {
 
   // Composite unique constraint to ensure a specific product variation appears only once per cart
   @@unique([cartId, productVariationId])
+}
+
+model AboutUs {
+  id             String   @id @default(cuid())
+  content        String
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ContactUs {
+  id             String   @id @default(cuid())
+  content        String
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

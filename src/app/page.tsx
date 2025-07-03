@@ -12,6 +12,8 @@ import Products from '@/components/widget/Products'
 import { ProductRepository } from '@/core/repositories/IProductRepository'
 import { GetAllProductsUseCase } from '@/core/usecases/GetAllProducts.usecase';
 import { ProductEntity } from '@/core/entities/product.entity'
+import { Metadata } from 'next';
+
 const Hero =async () => {
 
   const productRepository = new ProductRepository();
@@ -45,3 +47,11 @@ const Hero =async () => {
 }
 
 export default Hero
+
+export async function generateMetadata(): Promise<Metadata> {
+  const homepageContent = await getHomePage();
+  return {
+    title: homepageContent?.seoTitle || 'Home | Your Store',
+    description: homepageContent?.seoDescription || 'Welcome to our ecommerce store. Discover the latest products and deals!'
+  };
+}

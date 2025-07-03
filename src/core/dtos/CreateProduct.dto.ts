@@ -21,4 +21,6 @@ export interface CreateProductDTO {
   variations?: CreateProductVariationDTO[] | null;
   thumbnailVideo?: string | null;
   galleryImages?: ImageDTO[] | null; 
+  seoTitle?: string;
+  seoDescription?: string;
 }

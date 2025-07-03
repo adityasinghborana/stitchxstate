@@ -20,6 +20,8 @@ export class HomePageRepository implements IHomePageRepository {
       sections: prismaHomePage.sections as unknown as HomePageSection[],
       createdAt: prismaHomePage.createdAt,
       updatedAt: prismaHomePage.updatedAt,
+      seoTitle: prismaHomePage.seoTitle ?? '',
+      seoDescription: prismaHomePage.seoDescription ?? '',
     };
   }
 
@@ -33,6 +35,8 @@ export class HomePageRepository implements IHomePageRepository {
         homePageRecord = await prisma.homePage.create({
           data: {
             sections: [], // This is a valid JsonArray
+            seoTitle: '',
+            seoDescription: '',
           },
         });
         console.log("Default homepage record created successfully.");
@@ -57,6 +61,8 @@ export class HomePageRepository implements IHomePageRepository {
         where: { id: existingHomepage.id },
         data: {
           sections: data.sections as unknown as Prisma.JsonArray,
+          seoTitle: data.seoTitle ?? '',
+          seoDescription: data.seoDescription ?? '',
         },
       });
       return this.mapPrismaHomePageToHomePageEntity(updatedPrismaHomepage);

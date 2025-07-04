@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
-// Import auth and db from your centralized Firebase configuration file
-// This assumes your firebaseConfig.ts file is located at '@/firebase/config'
 import { auth, db } from '@/firebase/config';
 
 // Import your actual UI components from your project structure
@@ -13,14 +11,8 @@ import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { motion } from "framer-motion"; // Use framer-motion directly
 import { cn } from "@/lib/utils"; // Use your actual cn utility
 
-// Declare global variable for TypeScript to recognize __app_id
-// This is still needed for Firestore pathing that aligns with Canvas structure,
-// but will default for local development.
 declare const __app_id: string | undefined;
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-
-// Logo component (assuming it's either defined globally or in a separate utility file)
 export const Logo = () => {
   return (
     <a

@@ -82,7 +82,7 @@ const parseOrderEntity = (data: any): orderEntity => {
 
 export class OrderApiRepository implements IOrderRepository {
     async findAll(): Promise<orderEntity[]> {
-        const response = await fetch(`/api/orders/all`, {
+        const response = await fetch(`/api/orders/allOrders`, {
             method: 'GET',
             headers: getCommonHeaders(),
             credentials: 'include',
@@ -155,7 +155,7 @@ export class OrderApiRepository implements IOrderRepository {
     }
 
     async findById(orderId: string): Promise<orderEntity | null> {
-        const response = await fetch(`/api/orders/single?orderId=${orderId}`, {
+        const response = await fetch(`/api/orders/${orderId}`, {
             method: 'GET',
             headers: getCommonHeaders(),
             credentials: 'include',

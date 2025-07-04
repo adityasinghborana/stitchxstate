@@ -3,7 +3,6 @@ import { PrismaUserRepository } from '@/core/repositories/IUserRepository';
 import { GetAllUsersUseCase } from '@/core/usecases/GetAllUser.usecase';
 import { CreateUserUseCase } from '@/core/usecases/CreateUser.usecase';
 import { CreateUserDto } from '@/core/dtos/User.dto';
-import { GetUserByIdUseCase } from '@/core/usecases/GetUserById.usecase';
 
 const userRepository = new PrismaUserRepository();
 const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);

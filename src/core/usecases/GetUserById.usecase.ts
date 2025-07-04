@@ -1,5 +1,3 @@
-// src/core/usecases/GetUserById.usecase.ts
-
 import { UserEntity } from '@/core/entities/User.entity';
 import { IUserRepository } from "../repositories/IUserRepository";
 import { userResponseDto } from '@/core/dtos/User.dto';

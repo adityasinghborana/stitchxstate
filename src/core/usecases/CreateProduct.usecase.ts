@@ -9,7 +9,7 @@ export class CreateProductUseCase {
     // Here you could add business validation logic.
     // For example, check if a product with the same name already exists,
     // ensure price is not negative, etc.
-    if (productData.variations.length === 0) {
+    if (!productData.variations || productData.variations.length === 0) {
       throw new Error("A product must have at least one variation.");
     }
 

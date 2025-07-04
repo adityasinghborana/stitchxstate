@@ -1,16 +1,17 @@
 'use client'; 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UserApiRepository } from '@/infrastructure/frontend/repositories/UserRepositoy.api';
 import { useAuthStore } from '../../../store/authStore';
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
+import jwt from 'jsonwebtoken';
+import Cookies from 'js-cookie';
 
-export default function VerifyOtpPage(){
+function VerifyOtpPageContent(){
     const router = useRouter();
     const searchParams= useSearchParams();
     const initialEmail =searchParams.get('email');
@@ -41,7 +42,9 @@ export default function VerifyOtpPage(){
     }
     try {
         const response = await verifyApi.verifyOtpAndLogin(email,otp);
-        zustandLogin(response.token,response.user);
+        console.log('verification Response ',response);
+        Cookies.set('session', response.token, { expires: 1, path: '/' });
+        zustandLogin(response.user);
         router.push('/');
     } catch (err:any) {
         console.error('Verify OTP Error:', err);
@@ -93,5 +96,13 @@ export default function VerifyOtpPage(){
         {error && <p className="text-red-600 text-center mt-4">{error}</p>}
       </div>
     </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense>
+      <VerifyOtpPageContent />
+    </Suspense>
   );
 }

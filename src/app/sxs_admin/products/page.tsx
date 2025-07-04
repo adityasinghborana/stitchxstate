@@ -16,17 +16,16 @@ export default async function AdminProductListPage() {
 
   try {
     products = await getAllProductsUseCase.execute();
-  } catch (err: any) {
-    console.error("Error fetching products for admin list:", err);
-    error = err.message || 'Failed to load products.';
+  } catch (err) {
+    error = 'Failed to load products.';
   }
 
   return (
-    <div className="container mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="container w-full p-6 bg-white shadow-md rounded-lg  overflow-y-auto">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Product Management</h1>
 
       <div className="flex justify-end mb-4">
-        <Link href="/sxs_admin/products/create">
+        <Link href="/sxs_admin/products/add">
           <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 ease-in-out">
             Add New Product
           </button>

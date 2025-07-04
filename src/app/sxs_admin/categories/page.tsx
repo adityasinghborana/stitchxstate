@@ -20,7 +20,7 @@ export default async function AdminCategoryListPage() {
     }
 
     return (
-        <div className="container mx-auto p-6 bg-white shadow-md rounded-lg">
+        <div className="container mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto">
             <h1 className="text-3xl font-bold mb-6 text-gray-800">Categories Management</h1>
 
             <div className="flex justify-end mb-4">

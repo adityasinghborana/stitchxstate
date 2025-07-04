@@ -15,14 +15,19 @@ export async function GET(request: NextRequest) {
 
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-      email: string;
+      id: string | null;
+      email: string | null;
       isAdmin: boolean;
     };
 
+    if (!decoded.id || !decoded.email) {
+      return NextResponse.json({ message: 'Invalid token payload' }, { status: 401 });
+    }
+    const userId = decoded.id as string;
+
     // Fetch user from database
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: userId },
       select: {
         id: true,
         firstName: true,
@@ -41,10 +46,10 @@ export async function GET(request: NextRequest) {
 
     // Map to userResponseDto
     const userResponse: userResponseDto = {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
+      id: user.id ?? '',
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      email: user.email ?? '',
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       isAdmin: user.isAdmin,
@@ -52,9 +57,8 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({ user: userResponse, token }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error verifying token:', error);
-    // Be specific with the error message based on the type of error
     if (error instanceof jwt.JsonWebTokenError) {
       return NextResponse.json({ message: 'Invalid or expired token' }, { status: 401 });
     }

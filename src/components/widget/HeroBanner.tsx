@@ -8,20 +8,28 @@ import {
 } from "@/components/ui/carousel"
 import { slides } from './slideData'
 import Image from 'next/image'
-const HeroBanner = () => {
+import { HomepageEntity,CarouselSection } from '@/core/entities/HomePage.entity';
+interface Props {
+  homepageSection: HomepageEntity | null;
+}
+const HeroBanner = ({ homepageSection }: Props) => {
+  const carouselSection = homepageSection?.sections?.find(
+    (section): section is CarouselSection => section.type === 'carousel'
+  );
+  const slidesToRender = carouselSection?.images || [];
   return (
     <Carousel
       opts={{ align: "start", loop: true }}
       className="w-full h-[80vh] relative"
     >
       <CarouselContent>
-        {slides.map((item, index) => (
+        {slidesToRender.map((item, index) => (
           <CarouselItem key={index} className="w-full">
             <div className="relative w-full h-[80vh] overflow-hidden">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
-                  alt={item.altText}
+                  alt={item.alt}
                   fill
                   className="object-cover"
                 />

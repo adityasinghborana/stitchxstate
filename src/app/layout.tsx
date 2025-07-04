@@ -4,6 +4,13 @@ import "./globals.css";
 import AuthZustandProvider from "@/providers/AuthZustandProvider";
 import Header from "@/components/Header/page";
 import Footer from "@/components/Footer/Footer";
+import { getHeader } from "@/lib/HeaderSection/getHeader";
+import { HeaderSection } from "@/core/entities/Header.entity";
+import { FooterSection } from "@/core/entities/Footer.entity";
+import { getFooter } from "@/lib/FooterSection/getFooter";
+import { Toaster } from 'react-hot-toast';
+import ConditionalHeader from "@/components/ConditionalHeader";
+import ConditionalFooter from "@/components/ConditionalFooter";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,42 +24,39 @@ const geistMono = Geist_Mono({
 
 
 export const metadata:Metadata={
+  
   title: {
     template: '%s | My Next.js App', // '%s' will be replaced by page-specific title
     default: 'Welcome to My Next.js App', // Default title for the root route '/'
   },
   description: 'A starter Next.js application with authentication.',
-  // You can add other global meta tags here, e.g.:
-  // keywords: ['Next.js', 'Zustand', 'Authentication'],
-  // openGraph: {
-  //   title: 'My Next.js App',
-  //   description: 'A starter Next.js application with authentication.',
-  //   url: 'https://yourwebsite.com',
-  //   siteName: 'My Next.js App',
-  //   images: [
-  //     {
-  //       url: 'https://yourwebsite.com/og-image.jpg',
-  //       width: 800,
-  //       height: 600,
-  //     },
-  //   ],
-  // },
+  
 }
 
-export default function RootLayout({
+export default async function RootLayout({
+  
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const header: HeaderSection | null = await getHeader();
+  if (!header) {
+    throw new Error("Header data is required but was not found.");
+  }
+  const footer:FooterSection | null= await getFooter();
+  if(!footer){
+    throw new Error("Footer data is required but was not found");
+  }
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthZustandProvider>
-          <Header/>
+          <ConditionalHeader header={header} />
         {children}
-        <Footer/>
+        <Toaster />
+        <ConditionalFooter footer={footer} />
         </AuthZustandProvider>
       </body>
     </html>

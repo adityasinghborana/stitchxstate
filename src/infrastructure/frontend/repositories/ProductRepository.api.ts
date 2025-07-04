@@ -1,20 +1,12 @@
 import { IProductRepository } from "@/core/repositories/IProductRepository";
-import { ProductEntity } from "@/core/entities/product.entity";
+import { ProductEntity, ProductVariationEntity } from "@/core/entities/product.entity";
 import { CreateProductDTO } from "@/core/dtos/CreateProduct.dto";
 
-/**
- * ProductApiRepository is the implementation of the IProductRepository interface
- * that communicates with the backend REST API.
- * * It abstracts away all the details of HTTP communication (fetch, headers, body serialization).
- */
+
 export class ProductApiRepository implements IProductRepository {
 
-  /**
-   * Fetches all products from the backend API.
-   * @returns A promise that resolves to an array of ProductEntity.
-   */
+
   async findAll(): Promise<ProductEntity[]> {
-    // Make the GET request to our API endpoint.
     const response = await fetch('/api/products');
 
     // Check if the request was successful.
@@ -62,7 +54,7 @@ export class ProductApiRepository implements IProductRepository {
     return data;
   }
   async findById(id: string): Promise<ProductEntity | null> {
-       const response = await fetch(`/api/products/${id}`);
+       const response = await fetch(`http://localhost:3000/api/products/${id}`);
             if (!response.ok) {
               if (response.status === 404) return null;
               const errorData = await response.json();
@@ -97,7 +89,7 @@ export class ProductApiRepository implements IProductRepository {
             return updated;
   }
   async delete(id: string): Promise<ProductEntity> {
-       const response = await fetch(`/api/category/${id}`, {
+       const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
     });
 
@@ -108,5 +100,19 @@ export class ProductApiRepository implements IProductRepository {
      const deletedProduct: ProductEntity = await response.json();
     return deletedProduct;
   }
+  // Operation not supported by this API repository directly. Stock updates are handled by backend order/cart processing.
+    async updateProductVariationStock(
+        productVariationId: string,
+        newStock: number
+    ): Promise<ProductVariationEntity | null> {
+        console.warn(`ProductApiRepository: updateProductVariationStock is not meant to be called directly from the frontend. This operation is handled by backend services.`);
+        throw new Error("Operation not supported by this API repository directly. Stock updates are handled by backend order/cart processing.");
+    }
+
+    async findByProductVariationId(id: string): Promise<ProductEntity | null> {
+
+        console.warn(`ProductApiRepository: findByProductVariationId is not implemented. Please check IProductRepository definition.`);
+        throw new Error("Method not implemented in ProductApiRepository. Check IProductRepository for correct methods.");
+    }
 }
 

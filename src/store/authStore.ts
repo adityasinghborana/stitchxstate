@@ -16,7 +16,7 @@ interface AuthState {
   token: string | null;
   isLoading: boolean;
   error: string | null;
-  login: (token: string, user: User) => void;
+  login: (user: User) => void;
   logout: () => Promise<void>;
   initializeAuth: () => Promise<void>;
 }
@@ -28,8 +28,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   error: null,
 
-  login: (token, user) => {
-    set({ isAuthenticated: true, user, token, error: null });
+  login: ( user) => {
+    set({ isAuthenticated: true, user, error: null });
   },
 
   logout: async () => {
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         method: 'POST',
         credentials: 'include',
       });
-      set({ isAuthenticated: false, user: null, token: null, error: null });
+      set({ isAuthenticated: false, user: null, error: null });
     } catch (e) {
       console.error('Logout failed:', e);
       set({ error: 'Logout failed' });
@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         headers: { 'Content-Type': 'application/json' },
       });
       if (response.ok) {
-        const data: { user: userResponseDto; token?: string } = await response.json();
+        const data: { user: userResponseDto} = await response.json();
         set({
           isAuthenticated: true,
           user: {
@@ -64,12 +64,11 @@ export const useAuthStore = create<AuthState>((set) => ({
             lastName: data.user.lastName,
             isAdmin: data.user.isAdmin,
           },
-          token: data.token || null,
           isLoading: false,
           error: null,
         });
       } else {
-        set({ isAuthenticated: false, user: null, token: null, isLoading: false, error: null });
+        set({ isAuthenticated: false, user: null, isLoading: false, error: null });
       }
     } catch (e) {
       console.error('Failed to initialize auth:', e);

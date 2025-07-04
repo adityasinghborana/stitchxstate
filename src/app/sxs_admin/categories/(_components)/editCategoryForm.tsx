@@ -17,6 +17,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
 
   // Initialize state with data from initialCategory prop
   const [categoryName, setCategoryName] = useState<string>(initialCategory.name || '');
+  const [seoTitle, setSeoTitle] = useState<string>(initialCategory.seoTitle || '');
+  const [seoDescription, setSeoDescription] = useState<string>(initialCategory.seoDescription || '');
   // Now we only manage a single imageUrl string
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(initialCategory.imageUrl || null);
 
@@ -78,8 +80,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
       const newUrl = data.url;
 
       setNewlyUploadedImageUrl(newUrl); // Store this as the potential new image for the category
-      // setSuccessMessage('Image uploaded successfully to local server! Click "Update Category" to save changes.');
-      setSuccessMessage('Image uploaded. Click "Update Category" to save changes.'); // Better message
+      // setSuccessMessage('Image uploaded successfully to local server! Click &quot;Update Category&quot; to save changes.');
+      setSuccessMessage('Image uploaded. Click &quot;Update Category&quot; to save changes.'); // Better message
       setSelectedFile(null);
       setImagePreviewUrl(null);
     } catch (err) {
@@ -108,6 +110,8 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
     const categoryData: UpdateCategoryDTO = {
       name: categoryName.trim(),
       imageUrl: imageToSend, // Pass the single image URL
+      seoTitle,
+      seoDescription,
     };
 
     try {
@@ -131,20 +135,20 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
   };
 
   return (
-    <form onSubmit={handleSubmitCategory} className="space-y-6 p-6 bg-white shadow-lg rounded-lg max-w-xl mx-auto my-8">
+    <form onSubmit={handleSubmitCategory} className="space-y-6 p-6  bg-white shadow-lg rounded-lg w-full mx-auto my-8">
       <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-6">Edit Category: {initialCategory.name}</h2>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error! </strong>
-          <span className="block sm:inline">{error}</span>
+          <span className="block sm:inline">&quot;{error}&quot;</span>
         </div>
       )}
 
       {successMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Success! </strong>
-          <span className="block sm:inline">{successMessage}</span>
+          <span className="block sm:inline">&quot;{successMessage}&quot;</span>
         </div>
       )}
 
@@ -161,6 +165,31 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
           required
           disabled={isSubmitting}
         />
+      </div>
+
+      <div>
+        <label htmlFor="seoTitle" className="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
+        <input
+          type="text"
+          id="seoTitle"
+          name="seoTitle"
+          value={seoTitle}
+          onChange={e => setSeoTitle(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="SEO Title for this category"
+        />
+      </div>
+      <div>
+        <label htmlFor="seoDescription" className="block text-sm font-medium text-gray-700 mb-1">SEO Description</label>
+        <textarea
+          id="seoDescription"
+          name="seoDescription"
+          value={seoDescription}
+          onChange={e => setSeoDescription(e.target.value)}
+          rows={2}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          placeholder="SEO Description for this category"
+        ></textarea>
       </div>
 
       {/* Display Current Image (if any) */}
@@ -211,7 +240,7 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
         <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50 text-center">
           <h4 className="text-base font-semibold text-gray-800 mb-2">New Image Preview:</h4>
           <img src={imagePreviewUrl} alt="New Image Preview" className="max-w-full h-auto mx-auto rounded-md shadow-sm" style={{ maxWidth: '250px', maxHeight: '250px', objectFit: 'contain' }} />
-          <p className="text-xs text-gray-500 mt-2">This is a local preview of the file you selected. Click "Upload New Image Locally" to stage it for replacement.</p>
+          <p className="text-xs text-gray-500 mt-2">This is a local preview of the file you selected. Click &quot;Upload New Image Locally&quot; to stage it for replacement.</p>
         </div>
       )}
 
@@ -222,7 +251,7 @@ export function CategoryEditForm({ initialCategory, categoryId }: CategoryEditFo
             {newlyUploadedImageUrl}
           </a>
           <img src={newlyUploadedImageUrl} alt="Newly Uploaded Category Image" className="mt-2 max-w-full h-auto mx-auto rounded-md shadow-sm" style={{ maxWidth: '250px', maxHeight: '250px', objectFit: 'contain' }} />
-          <p className="text-xs text-gray-600 mt-2">This new image has been uploaded to the server. Click "Update Category" to replace the current image with this one.</p>
+          <p className="text-xs text-gray-600 mt-2">This new image has been uploaded to the server. Click &quot;Update Category&quot; to replace the current image with this one.</p>
           <button
             type="button"
             onClick={() => {

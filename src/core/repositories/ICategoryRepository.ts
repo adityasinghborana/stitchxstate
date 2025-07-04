@@ -34,21 +34,22 @@ export class CategoryRepository implements ICategoryRepository {
     const newCategory = await prisma.category.create({
       data: {
         name: categoryData.name,
-        imageUrl: categoryData.imageUrl, 
+        imageUrl: categoryData.imageUrl,
+        seoTitle: categoryData.seoTitle,
+        seoDescription: categoryData.seoDescription,
       },
     });
     return newCategory as CategoryEntity;
   }
 
   async update(id: string, categoryData: UpdateCategoryDTO): Promise<CategoryEntity> {
-
     const updatedCategory = await prisma.category.update({
       where: { id },
       data: {
-        // Only update name if it's provided in the DTO
         name: categoryData.name !== undefined ? categoryData.name : undefined,
-        // Only update imageUrl if it's provided in the DTO
         imageUrl: categoryData.imageUrl !== undefined ? categoryData.imageUrl : undefined,
+        seoTitle: categoryData.seoTitle !== undefined ? categoryData.seoTitle : undefined,
+        seoDescription: categoryData.seoDescription !== undefined ? categoryData.seoDescription : undefined,
       },
     });
     return updatedCategory as CategoryEntity;

@@ -38,11 +38,5 @@ export interface VerifyOtpDto{
 
 export interface LoginResponseDto {
     token:string;
-    user:{
-        id:string,
-        firstName:string,
-        lastName:string,
-        email:string,
-        isAdmin:boolean
-    }
+    user:userResponseDto
 }

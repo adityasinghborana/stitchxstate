@@ -110,7 +110,7 @@ export class UserApiRepository implements IUserRepository {
 
 // request an otp from the backend 
 //call the post /api/auth/request-otp
-async requestOtp(email: string): Promise<UserEntity | null> {
+async requestOtp(email: string): Promise<{ user: UserEntity, otp: string } | null> {
   const response = await fetch(`/api/users/request-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -118,11 +118,11 @@ async requestOtp(email: string): Promise<UserEntity | null> {
   });
 
   // Read the response body once
-  const result = await this.handleResponse<{ user: userResponseDto | null }>(response);
+  const result = await this.handleResponse<{ user: userResponseDto | null, otp?: string }>(response);
 
   // If user exists, map and return it
   if (result.user) {
-    return this.mapResponseDtoToEntity(result.user);
+    return { user: this.mapResponseDtoToEntity(result.user), otp: result.otp || '' };
   }
 
   // If no user but response is OK, return null or a success indicator

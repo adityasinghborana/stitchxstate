@@ -5,7 +5,7 @@ import { ProductEntity } from '@/core/entities/product.entity';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // For page refresh
-import { ProductRepository } from '@/core/repositories/IProductRepository';
+import { ProductApiRepository } from '@/infrastructure/frontend/repositories/ProductRepository.api';
 import { deleteProductUsecase } from '@/core/usecases/DeleteProduct.usecase';
 
 interface ProductListTableProps {
@@ -14,7 +14,7 @@ interface ProductListTableProps {
 
 export default function ProductListTable({ products }: ProductListTableProps) {
   const router = useRouter();
-  const productRepository = new ProductRepository();
+  const productRepository = new ProductApiRepository();
   const DeleteProductUseCase = new deleteProductUsecase(productRepository);
 
   const handleDelete = async (productId: string, productName: string) => {
@@ -74,6 +74,7 @@ export default function ProductListTable({ products }: ProductListTableProps) {
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {product.categories.map(cat => cat.name).join(', ') || 'N/A'}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.createdAt ? new Date(product.createdAt).toLocaleString() : 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <Link href={`/sxs_admin/products/${product.id}/edit`}>
                     <button className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>

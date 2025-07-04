@@ -6,12 +6,10 @@ export default async function CategoryListPage(){
     const categoryRepository = new CategoryRepository();
     const getAllcategoriesUseCase = new GetAllCategoriesUseCase(categoryRepository);
     let categories:CategoryEntity[]=[];
-    let error:string |null;
     try {
         categories=await getAllcategoriesUseCase.execute();
-    } catch (err:any) {
+    } catch (err) {
         console.error("Error fetching categories:", err); 
-        error = err.message || 'Failed to load categories.';
     }
 
     return(

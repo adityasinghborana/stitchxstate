@@ -21,23 +21,7 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 
 // Logo component (assuming it's either defined globally or in a separate utility file)
-export const Logo = () => {
-  return (
-    <a
-      href="/sxs_admin" // Link to dashboard
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black dark:text-white"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white"
-      >
-        Admin Panel
-      </motion.span>
-    </a>
-  );
-};
+
 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -178,8 +162,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
         <div
             className={cn(
-                "mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-                "h-full", // Use h-screen for full height in layout
+                "mx-auto flex w-full max-w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-full", // Use h-screen for full height in layout
             )}
         >
          
@@ -224,12 +207,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 `}
             </style>
 
-            <Sidebar open={openSidebar} setOpen={setOpenSidebar} animate={false}>
-                <SidebarBody className="justify-between gap-10">
-                    <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-                        <>
+            <Sidebar open={openSidebar} setOpen={setOpenSidebar} animate={true}>
+                <SidebarBody className="justify-between gap-10" >
+                    <div className="flex flex-1 h-[100vh] flex-col overflow-x-hidden overflow-y-auto">
+                        {/* <>
                             <Logo />
-                        </>
+                        </> */}
                         <div className="mt-8 flex flex-col gap-2">
                             {links.map((link, idx) => (
                                 <SidebarLink key={idx} link={link} />
@@ -267,8 +250,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SidebarBody>
             </Sidebar>
             {/* Main content area, where children (actual page content) will be rendered */}
-            <div className="flex flex-1">
-                <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-1 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex flex-1 ">
+                <div className="flex h-full w-full flex-1 flex-col gap-2  border bg-neutral-100 md:p-10  dark:bg-neutral-900 ">
                     {children} {/* This is where the AdminLayout's children will be rendered */}
                 </div>
             </div>

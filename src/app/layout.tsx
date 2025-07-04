@@ -9,6 +9,8 @@ import { HeaderSection } from "@/core/entities/Header.entity";
 import { FooterSection } from "@/core/entities/Footer.entity";
 import { getFooter } from "@/lib/FooterSection/getFooter";
 import { Toaster } from 'react-hot-toast';
+import ConditionalHeader from "@/components/ConditionalHeader";
+import ConditionalFooter from "@/components/ConditionalFooter";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -51,10 +53,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthZustandProvider>
-          <Header header={header}/>
+          <ConditionalHeader header={header} />
         {children}
         <Toaster />
-        <Footer footer={footer}/>
+        <ConditionalFooter footer={footer} />
         </AuthZustandProvider>
       </body>
     </html>

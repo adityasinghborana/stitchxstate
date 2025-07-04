@@ -43,7 +43,7 @@ const dashboardSummaryConfig = [
 const Dashboard = ({ dashboardData }: DashboardProps) => {
   if (!dashboardData) {
     return (
-      <div className='bg-gray-100 min-h-screen flex items-center justify-center'>
+      <div className='bg-gray-100 min-h-screen flex items-center justify-center '>
         <p className='text-gray-600'>Loading data or no dashboard data available.</p>
       </div>
     );
@@ -51,8 +51,8 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
   const growthChartData: GrowthDataPoint[] = dashboardData.growthHistory || [];
 
   return (
-    <div className='bg-gray-100 min-h-screen flex items-center justify-center py-8 px-4'>
-      <div className='w-full max-w-6xl bg-white rounded-lg shadow-xl p-6 md:p-10 flex flex-col'>
+   
+      <div className='w-full '>
         <h1 className='text-gray-800 font-bold text-4xl mb-6'>Dashboard</h1>
 
         {/* Summary Cards Section */}
@@ -101,7 +101,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
         ) : (
             <p className='text-gray-500 text-center'>No historical growth data available for charts.</p>
         )}
-    </div>
+
         
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Recent Orders Section */}

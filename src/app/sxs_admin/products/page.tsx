@@ -21,7 +21,7 @@ export default async function AdminProductListPage() {
   }
 
   return (
-    <div className="container max-w-[1150px] p-6 bg-white shadow-md rounded-lg  overflow-y-auto">
+    <div className="container w-full p-6 bg-white shadow-md rounded-lg  overflow-y-auto">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Product Management</h1>
 
       <div className="flex justify-end mb-4">

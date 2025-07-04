@@ -4,12 +4,15 @@ import { CreateUserDto, UpdateUserDto, LoginResponseDto } from "../dtos/User.dto
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
-if (!process.env.JWT_SECRET) {
+
+
+const JWT_SECRET = process.env.JWT_SECRET ;
+const OTP_EXPIRY_MINUTES = 5; 
+
+// otp valid for 5 minutes after five minutes it will expires
+if (JWT_SECRET === null) {
   throw new Error("JWT_SECRET environment variable is not defined");
 }
-const JWT_SECRET = process.env.JWT_SECRET;
-const OTP_EXPIRY_MINUTES = 5; // otp valid for 5 minutes after five minutes it will expires
-
 export interface IUserRepository {
     findAll(): Promise<UserEntity[]>;
     findById(id: string): Promise<UserEntity | null>;
@@ -164,11 +167,11 @@ export class PrismaUserRepository implements IUserRepository {
         email: user.email,
         isAdmin: user.isAdmin
       },
-      JWT_SECRET,
+      JWT_SECRET as string,
       { expiresIn: '1h' }
     );
 
-    return {user,token}
+    return { user, token };
   }
 }
   

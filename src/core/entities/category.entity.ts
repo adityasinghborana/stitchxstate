@@ -15,7 +15,7 @@ export interface CategoryEntity {
   id: string;
   name: string;
   createdAt: Date;
-  imageUrl?: string |null; 
-  seoTitle?: string;
-  seoDescription?: string;
+  imageUrl?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
 }

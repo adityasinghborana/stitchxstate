@@ -2,7 +2,7 @@ import CreateCategoryForm from "../(_components)/CreatCategoryForm";
 
 export default function CreateCategoryPageSSR() {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
+    <div className="w-full bg-gray-100 flex flex-col items-center py-10">
       <h1 className="text-4xl font-extrabold text-gray-900 mb-10">
         Category Management Dashboard
       </h1>

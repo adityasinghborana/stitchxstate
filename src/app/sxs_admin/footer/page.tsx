@@ -64,11 +64,29 @@ const FooterSectionPage = () => {
         }));
         setFooterData({ ...data, sections: updateSections });
       }
-    } catch (err: any) {
-      console.error("Error fetching header data:", err);
-      setError(
-        `Failed to fetch header data: ${err.message || "Unknown error"}`
-      );
+    } catch (err: unknown) {
+      // Changed 'any' to 'unknown'
+      console.error("Error fetching footer data:", err);
+
+      let errorMessage = "Failed to fetch footer data. Unknown error occurred.";
+
+      // Type narrowing for the 'unknown' error
+      if (err instanceof Error) {
+        errorMessage = `Failed to fetch footer data: ${err.message}`;
+      } else if (typeof err === "string") {
+        errorMessage = `Failed to fetch footer data: ${err}`;
+      } else if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as { message: unknown }).message === "string"
+      ) {
+        // This covers cases where an object with a 'message' property is thrown, but it's not an instance of Error.
+        errorMessage = `Failed to fetch footer data: ${
+          (err as { message: string }).message
+        }`;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

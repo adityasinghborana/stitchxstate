@@ -28,10 +28,28 @@ export default function CategoryListTable({
         await deleteCategoriesuseCase.execute(categoryId);
         toast.success(`Category "${categoryName}" deleted successfully!`);
         router.refresh();
-      } catch (error: any) {
-        toast.error(
-          `Failed to delete category "${categoryName}": ${error.message}`
-        );
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
+        console.error("Failed to delete category:", error); // Log the full error for debugging
+
+        let errorMessage = `Failed to delete category "${categoryName}". Please try again.`;
+
+        // Type narrowing for the 'unknown' error
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === "string") {
+          errorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          // This covers cases where an object with a 'message' property is thrown, but it's not an instance of Error.
+          errorMessage = (error as { message: string }).message;
+        }
+
+        toast.error(`${errorMessage}`);
       }
     }
   };

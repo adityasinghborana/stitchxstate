@@ -138,17 +138,27 @@ const CreateProductForm: React.FC = () => {
           thumbnailVideo: uploadedVideoUrl,
         }));
         showCustomMessage("Video uploaded successfully!");
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Error uploading video:", error);
-        showCustomMessage(
-          `Error uploading video: ${error.message || "Something went wrong."}`,
-          true
-        );
-        // Revert to preview URL or clear if upload fails
+        let uploadErrorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          uploadErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          uploadErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          uploadErrorMessage = (error as { message: string }).message;
+        }
+        showCustomMessage(`Error uploading video: ${uploadErrorMessage}`, true);
         setProductData((prev) => ({
           ...prev,
-          thumbnailVideo: videoPreviewUrl,
-        })); // Keep the preview
+          thumbnailVideo: videoPreviewUrl, // Keep the preview on error
+        }));
       } finally {
         // Clear the file input
         event.target.value = "";
@@ -202,19 +212,29 @@ const CreateProductForm: React.FC = () => {
             return newState;
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Error uploading image:", error);
-        showCustomMessage(
-          `Error uploading image: ${error.message || "Something went wrong."}`,
-          true
-        );
+        let uploadErrorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          uploadErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          uploadErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          uploadErrorMessage = (error as { message: string }).message;
+        }
+        showCustomMessage(`Error uploading image: ${uploadErrorMessage}`, true);
         if (type === "gallery") {
           setCurrentGalleryImagePreview(null);
         } else if (type === "variation" && variationIndex !== undefined) {
           setCurrentVariationImagePreviews((prev) => {
             const newState = [...prev];
             if (newState[variationIndex]) {
-              // Ensure it exists before trying to clear
               newState[variationIndex][0] = "";
             }
             return newState;
@@ -367,12 +387,23 @@ const CreateProductForm: React.FC = () => {
         setCurrentVariationImagePreviews([]);
         setIsUploadingGalleryImage(false);
         setIsUploadingVariationImage([]);
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Error adding product:", error);
-        showCustomMessage(
-          `Error: ${error.message || "Something went wrong."}`,
-          true
-        );
+        let submitErrorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          submitErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          submitErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          submitErrorMessage = (error as { message: string }).message;
+        }
+        showCustomMessage(`Error: ${submitErrorMessage}`, true);
       } finally {
         setLoading(false);
       }

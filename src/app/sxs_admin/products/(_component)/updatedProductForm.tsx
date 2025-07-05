@@ -119,12 +119,24 @@ const UpdateProductForm: React.FC<UpdateProductFormProps> = ({ productId }) => {
         );
 
         showCustomMessage("Product data loaded successfully.");
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Failed to fetch product or categories:", error);
+        let fetchErrorMessage = "Product not found.";
+        if (error instanceof Error) {
+          fetchErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          fetchErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          fetchErrorMessage = (error as { message: string }).message;
+        }
         showCustomMessage(
-          `Failed to load product data: ${
-            error.message || "Product not found."
-          }`,
+          `Failed to load product data: ${fetchErrorMessage}`,
           true
         );
       } finally {
@@ -180,12 +192,23 @@ const UpdateProductForm: React.FC<UpdateProductFormProps> = ({ productId }) => {
           thumbnailVideo: uploadedVideoUrl,
         }));
         showCustomMessage("Video uploaded successfully!");
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Error uploading video:", error);
-        showCustomMessage(
-          `Error uploading video: ${error.message || "Something went wrong."}`,
-          true
-        );
+        let uploadErrorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          uploadErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          uploadErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          uploadErrorMessage = (error as { message: string }).message;
+        }
+        showCustomMessage(`Error uploading video: ${uploadErrorMessage}`, true);
       } finally {
         event.target.value = "";
       }
@@ -237,12 +260,23 @@ const UpdateProductForm: React.FC<UpdateProductFormProps> = ({ productId }) => {
             return newState;
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Error uploading image:", error);
-        showCustomMessage(
-          `Error uploading image: ${error.message || "Something went wrong."}`,
-          true
-        );
+        let uploadErrorMessage = "Something went wrong.";
+        if (error instanceof Error) {
+          uploadErrorMessage = error.message;
+        } else if (typeof error === "string") {
+          uploadErrorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          uploadErrorMessage = (error as { message: string }).message;
+        }
+        showCustomMessage(`Error uploading image: ${uploadErrorMessage}`, true);
         if (type === "gallery") {
           setCurrentGalleryImagePreview(null);
         } else if (type === "variation" && variationIndex !== undefined) {

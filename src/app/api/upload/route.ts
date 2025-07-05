@@ -1,19 +1,19 @@
 // app/api/upload/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs/promises'; // Use fs.promises for async file operations
+import { NextRequest, NextResponse } from "next/server";
+import multer from "multer";
+import path from "path";
+import fs from "fs/promises"; // Use fs.promises for async file operations
 
 // IMPORTANT: For production, consider using a more robust temporary directory
 // and handling cleanup, or better yet, upload directly to cloud storage.
-const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+const uploadDir = path.join(process.cwd(), "public", "uploads");
 
 // Ensure the upload directory exists
 async function ensureUploadDir() {
   try {
     await fs.mkdir(uploadDir, { recursive: true });
   } catch (error) {
-    console.error('Failed to create upload directory:', error);
+    console.error("Failed to create upload directory:", error);
     // You might want to throw an error or handle this more gracefully
   }
 }
@@ -25,8 +25,11 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+    );
   },
 });
 
@@ -37,12 +40,18 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif|webp/; // Added webp
     const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const extname = filetypes.test(
+      path.extname(file.originalname).toLowerCase()
+    );
 
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb(new Error("Error: Only image files (JPEG, JPG, PNG, GIF, WebP) are allowed!"));
+    cb(
+      new Error(
+        "Error: Only image files (JPEG, JPG, PNG, GIF, WebP) are allowed!"
+      )
+    );
   },
 });
 
@@ -65,10 +74,13 @@ export async function POST(request: NextRequest) {
     // Multer expects a Node.js 'req' object, so we need to convert NextRequest body
     // Next.js (App Router) Request object has .formData() which is easier
     const formData = await request.formData();
-    const file = formData.get('image') as File | null; // 'image' is the key from frontend
+    const file = formData.get("image") as File | null; // 'image' is the key from frontend
 
     if (!file) {
-      return NextResponse.json({ message: 'No file uploaded.' }, { status: 400 });
+      return NextResponse.json(
+        { message: "No file uploaded." },
+        { status: 400 }
+      );
     }
 
     // Convert File object to Buffer for Multer (which expects Node.js streams/buffers)
@@ -77,7 +89,9 @@ export async function POST(request: NextRequest) {
     // Create a dummy 'req' and 'res' object for multer compatibility
     // In a real scenario with Next.js 13+, you might parse formData manually or use a library that's App Router native for files.
     // For now, let's stick to the multer usage as requested, simulating its behavior.
-    const uniqueFileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.name)}`;
+    const uniqueFileName = `${Date.now()}-${Math.round(
+      Math.random() * 1e9
+    )}${path.extname(file.name)}`;
     const filePath = path.join(uploadDir, uniqueFileName);
 
     await fs.writeFile(filePath, buffer);
@@ -86,15 +100,20 @@ export async function POST(request: NextRequest) {
     // This assumes your Next.js app serves static files from /public
     const imageUrl = `/uploads/${uniqueFileName}`; // This is the URL accessible from the browser
 
-    return NextResponse.json({
-      message: 'Image uploaded successfully!',
-      url: imageUrl,
-      filename: uniqueFileName,
-    }, { status: 200 });
-
-  } catch (error: any) {
-    console.error('API Upload Error:', error);
-    return NextResponse.json({ message: error.message || 'File upload failed.' }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: "Image uploaded successfully!",
+        url: imageUrl,
+        filename: uniqueFileName,
+      },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    console.error("API Upload Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
   }
 }
 

@@ -69,11 +69,28 @@ const HeaderSectionPage = () => {
         }));
         setHeaderData({ ...data, sections: updatedSections });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // Changed 'any' to 'unknown'
       console.error("Error fetching header data:", err);
-      setError(
-        `Failed to fetch header data: ${err.message || "Unknown error"}`
-      );
+
+      let errorMessage = "Failed to fetch header data. Unknown error occurred.";
+
+      // Type narrowing for the 'unknown' error
+      if (err instanceof Error) {
+        errorMessage = `Failed to fetch header data: ${err.message}`;
+      } else if (typeof err === "string") {
+        errorMessage = `Failed to fetch header data: ${err}`;
+      } else if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as { message: unknown }).message === "string"
+      ) {
+        errorMessage = `Failed to fetch header data: ${
+          (err as { message: string }).message
+        }`;
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

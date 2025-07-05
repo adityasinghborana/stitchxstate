@@ -13,9 +13,27 @@ export default async function AdminCategoryListPage() {
   try {
     // This fetch will happen on the server, Next.js handles the relative path
     categories = await getAllCategories.execute();
-  } catch (err: any) {
+  } catch (err: unknown) {
+    // Changed 'any' to 'unknown'
     console.error("Error fetching categories:", err);
-    error = err.message || "Failed to load categories.";
+    let errorMessage = "Failed to load categories."; // Default error message
+
+    // Type narrowing for the 'unknown' error
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    } else if (typeof err === "string") {
+      errorMessage = err;
+    } else if (
+      typeof err === "object" &&
+      err !== null &&
+      "message" in err &&
+      typeof (err as { message: unknown }).message === "string"
+    ) {
+      // Handles cases where a non-Error object with a 'message' property is thrown
+      errorMessage = (err as { message: string }).message;
+    }
+
+    error = errorMessage;
   }
 
   return (

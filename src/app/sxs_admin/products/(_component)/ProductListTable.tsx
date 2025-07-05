@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation"; // For page refresh
 import { ProductApiRepository } from "@/infrastructure/frontend/repositories/ProductRepository.api";
 import { deleteProductUsecase } from "@/core/usecases/DeleteProduct.usecase";
-
+import toast from "react-hot-toast";
 interface ProductListTableProps {
   products: ProductEntity[];
 }
@@ -27,9 +27,29 @@ export default function ProductListTable({ products }: ProductListTableProps) {
         await DeleteProductUseCase.execute(productId);
         alert(`Product "${productName}" deleted successfully!`);
         router.refresh(); // Refresh the page to show updated list
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Changed 'any' to 'unknown'
         console.error("Failed to delete product:", error);
-        alert(`Failed to delete product "${productName}": ${error.message}`);
+
+        let errorMessage = "An unknown error occurred."; // Default message
+
+        // Type narrowing to get a more specific error message
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === "string") {
+          errorMessage = error;
+        } else if (
+          typeof error === "object" &&
+          error !== null &&
+          "message" in error &&
+          typeof (error as { message: unknown }).message === "string"
+        ) {
+          errorMessage = (error as { message: string }).message;
+        }
+
+        toast.error(
+          `Failed to delete product "${productName}": ${errorMessage}`
+        );
       }
     }
   };

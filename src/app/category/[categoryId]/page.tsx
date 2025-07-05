@@ -1,27 +1,37 @@
-import { ProductRepository } from '@/core/repositories/IProductRepository';
-import { GetProductsByCategoryUseCase } from '@/core/usecases/getProductByCategoryId';
-import { getCategoryByIdUSeCase } from '@/core/usecases/GetCategoryById.usecase';
-import { CategoryRepository } from '@/core/repositories/ICategoryRepository';
+import { ProductRepository } from "@/core/repositories/IProductRepository";
+import { GetProductsByCategoryUseCase } from "@/core/usecases/getProductByCategoryId";
+import { getCategoryByIdUSeCase } from "@/core/usecases/GetCategoryById.usecase";
+import { CategoryRepository } from "@/core/repositories/ICategoryRepository";
+import { GetAllCategoriesUseCase } from "@/core/usecases/GetAllCategory.usecase";
 
-import ProductGridDisplay from '../(component)/productGripDisplay';
-import Link from 'next/link';
+import ProductGridDisplay from "../(component)/productGripDisplay";
+import Link from "next/link";
 
-export default async function ProductByCategoryPage({ params }: { params: Promise<{ categoryId: string }> }) {
-
+export default async function ProductByCategoryPage({
+  params,
+}: {
+  params: Promise<{ categoryId: string }>;
+}) {
   const { categoryId } = await params;
 
   // Initialize your repositories
   const productRepository = new ProductRepository();
-  const categoryRepository = new CategoryRepository(); 
+  const categoryRepository = new CategoryRepository();
 
   // Initialize your use cases with the repositories
-  const getProductsByCategoryUseCase = new GetProductsByCategoryUseCase(productRepository);
+  const getProductsByCategoryUseCase = new GetProductsByCategoryUseCase(
+    productRepository
+  );
   const getCategoryByIdUseCase = new getCategoryByIdUSeCase(categoryRepository);
+  const getAllCategoriesUseCase = new GetAllCategoriesUseCase(
+    categoryRepository
+  );
 
   // 2. Use the new 'categoryId' variable here
-  const [products, category] = await Promise.all([
+  const [products, category, categories] = await Promise.all([
     getProductsByCategoryUseCase.execute(categoryId),
-    getCategoryByIdUseCase.execute(categoryId)
+    getCategoryByIdUseCase.execute(categoryId),
+    getAllCategoriesUseCase.execute(),
   ]);
 
   // Handle case where category is not found
@@ -31,7 +41,10 @@ export default async function ProductByCategoryPage({ params }: { params: Promis
         <h1 className="text-3xl font-bold mb-4">Category Not Found</h1>
         {/* This will now work correctly */}
         <p>The category with ID {categoryId} does not exist.</p>
-        <Link href="/category" className="text-blue-600 hover:underline mt-4 block">
+        <Link
+          href="/category"
+          className="text-blue-600 hover:underline mt-4 block"
+        >
           Back to All Categories
         </Link>
       </div>
@@ -45,9 +58,11 @@ export default async function ProductByCategoryPage({ params }: { params: Promis
       </h1>
 
       {products.length > 0 ? (
-        <ProductGridDisplay products={products} />
+        <ProductGridDisplay products={products} categories={categories} />
       ) : (
-        <p className="text-center text-gray-500">No products found in this category.</p>
+        <p className="text-center text-gray-500">
+          No products found in this category.
+        </p>
       )}
 
       <div className="text-center mt-8">

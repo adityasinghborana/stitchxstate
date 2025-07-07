@@ -1,12 +1,22 @@
-import { CartEntity, CartItemEntity, CartStatus } from "../entities/cart.entity";
-import { AddToCartDTO, UpdateCartItemDTO, RemoveFromCartDTO } from "../dtos/Cart.dto";
+import {
+  CartEntity,
+  CartItemEntity,
+  CartStatus,
+} from "../entities/cart.entity";
+import {
+  AddToCartDTO,
+  UpdateCartItemDTO,
+  RemoveFromCartDTO,
+  GuestCartDTO, // Import the new DTO
+  MergeGuestCartDTO,
+} from "../dtos/Cart.dto";
 import prisma from "@/lib/prisma"; // Assuming this is your global PrismaClient instance
 import { PrismaClient, Prisma } from "@prisma/client";
 
 // Define a more specific type for the Prisma client methods used
 type PrismaModelClient = Pick<
   PrismaClient,
-  'cart' | 'cartItem' | 'productVariation' // Only include models/methods you actually use with 'tx' or 'prisma'
+  "cart" | "cartItem" | "productVariation" // Only include models/methods you actually use with 'tx' or 'prisma'
 >;
 
 // Define the correct union type for Prisma client or transaction client
@@ -14,58 +24,48 @@ type PrismaClientOrTransaction = PrismaClient | Prisma.TransactionClient;
 
 // Define the interface for the Cart Repository
 export interface ICartRepository {
-  findByUserId(userId: string, txClient?: PrismaClientOrTransaction): Promise<CartEntity | null>;
-  create(userId: string, txClient?: PrismaClientOrTransaction): Promise<CartEntity>;
-  addItem(dto: AddToCartDTO, userId: string): Promise<CartEntity>;
+  // Existing methods for authenticated users
+  findByUserId(
+    userId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity | null>;
+  create(
+    userId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity>;
+ addItem(dto: AddToCartDTO, identifier: string, isGuest: boolean): Promise<CartEntity>;// This method will be updated to handle guestId too
   updateItem(dto: UpdateCartItemDTO): Promise<CartEntity>;
   removeItem(dto: RemoveFromCartDTO): Promise<CartEntity>;
-  clearCart(userId: string): Promise<CartEntity>; // Changed to userId as per original comment
-  getCartWithItems(userId: string): Promise<CartEntity | null>;
+  clearCart(identifier: string, isGuest: boolean): Promise<CartEntity>; // Modified to accept identifier and a flag
+  getCartWithItems(
+    identifier: string,
+    isGuest: boolean
+  ): Promise<CartEntity | null>; // Modified to accept identifier and a flag
+
+  // New methods for guest users
+  findByGuestId(
+    guestId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity | null>;
+  createGuestCart(
+    guestId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity>;
+  addItemToGuestCart(dto: GuestCartDTO): Promise<CartEntity>; // Specific for adding to guest cart
+  mergeGuestCart(dto: MergeGuestCartDTO): Promise<CartEntity>;
 }
 
 // Implement the Cart Repository
 export class CartRepository implements ICartRepository {
-
-  // Helper method to map Prisma's raw cart object to CartEntity
-  private mapToCartEntity(cart: {
-    id: string;
-    userId: string | null;
-    items: {
-      id: string;
-      cartId: string;
-      productVariationId: string;
-      productId:string,
-      quantity: number;
-      price: number;
-      createdAt: Date;
-      updatedAt: Date;
-      productVariation: {
-        id: string;
-        productId: string | null;
-        size: string;
-        color: string;
-        price: number;
-        salePrice: number;
-        stock: number;
-        createdAt: Date;
-        updatedAt: Date;
-        images: { id: string; url: string; productVariationId: string | null; createdAt: Date }[];
-      };
-    }[];
-    totalAmount: number;
-    totalItems: number;
-    status: string;
-    createdAt: Date;
-    updatedAt: Date;
-    lastActivity: Date;
-  }): CartEntity {
+  private mapToCartEntity(cart: any): CartEntity {
     return {
       id: cart.id,
       userId: cart.userId ?? undefined,
-      items: cart.items.map((item) => ({
+      guestId: cart.guestId ?? undefined, // Map guestId
+      items: cart.items.map((item: any) => ({
         id: item.id,
         cartId: item.cartId,
-        productId:item.productId,
+        productId: item.productId,
         productVariationId: item.productVariationId,
         productVariation: {
           id: item.productVariation.id,
@@ -77,7 +77,7 @@ export class CartRepository implements ICartRepository {
           stock: item.productVariation.stock,
           createdAt: item.productVariation.createdAt,
           updatedAt: item.productVariation.updatedAt,
-          images: item.productVariation.images.map((img) => ({
+          images: item.productVariation.images.map((img: any) => ({
             id: img.id,
             url: img.url,
             productVariationId: img.productVariationId ?? undefined,
@@ -98,52 +98,61 @@ export class CartRepository implements ICartRepository {
     };
   }
 
-  // Private helper to update cart totals and prices within a transaction if provided
-  private async updateCartTotals(cartId: string, txClient?: PrismaClientOrTransaction): Promise<CartEntity> {
-    // Use the provided transactional client or the global prisma client.
-    // Assert txClient as PrismaClient to satisfy TypeScript when it's present,
-    // and then pick specific models for type safety.
+  private async updateCartTotals(
+    cartId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity> {
     const client: PrismaModelClient = (txClient || prisma) as PrismaClient;
-
     if (!cartId) throw new Error("Cart ID is required");
 
-    // Fetch all cart items for the given cart
-    const cartItems = await client.cartItem.findMany({ // Use 'client'
+    const cartItems = await client.cartItem.findMany({
       where: { cartId },
       include: { productVariation: true },
     });
 
-    // Update prices of each cart item to reflect current product variation prices (e.g., sale price changes)
     for (const item of cartItems) {
-      await client.cartItem.update({ // Use 'client'
+      await client.cartItem.update({
         where: { id: item.id },
         data: {
-          price: item.productVariation.salePrice > 0 ? item.productVariation.salePrice : item.productVariation.price,
+          price:
+            item.productVariation.salePrice > 0
+              ? item.productVariation.salePrice
+              : item.productVariation.price,
         },
       });
     }
 
-    // Fetch updated cart items to ensure accurate total calculation after price updates
-    const updatedItems = await client.cartItem.findMany({ // Use 'client'
+    const updatedItems = await client.cartItem.findMany({
       where: { cartId },
       include: { productVariation: true },
     });
 
-    // Calculate total items and total amount
-    const totalItems = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
-    const totalAmount = updatedItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
+    const totalItems = updatedItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    const totalAmount = updatedItems.reduce(
+      (sum, item) => sum + item.quantity * item.price,
+      0
+    );
 
-    // Update the main Cart record in the database with new totals and last activity
-    const updatedCart = await client.cart.update({ // Use 'client'
+    const updatedCart = await client.cart.update({
       where: { id: cartId },
       data: { totalItems, totalAmount, lastActivity: new Date() },
-      include: { items: { include: { productVariation: { include: { images: true } } } } },
+      include: {
+        items: { include: { productVariation: { include: { images: true } } } },
+      },
     });
 
     return this.mapToCartEntity(updatedCart);
   }
 
-  async findByUserId(userId: string, txClient?: PrismaClientOrTransaction): Promise<CartEntity | null> {
+  // --- Authenticated User Cart Methods ---
+
+  async findByUserId(
+    userId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity | null> {
     const client: PrismaModelClient = (txClient || prisma) as PrismaClient;
     if (!userId) throw new Error("User ID is required");
 
@@ -162,16 +171,13 @@ export class CartRepository implements ICartRepository {
       },
     });
 
-    if (!cart) {
-      // If no cart is found, attempt to create one. Pass the txClient to 'create' method
-      // to ensure it operates within the same transaction if findByUserId was called in one.
-      return await this.create(userId, txClient);
-    }
-
-    return this.mapToCartEntity(cart);
+    return cart ? this.mapToCartEntity(cart) : null;
   }
 
-  async create(userId: string, txClient?: PrismaClientOrTransaction): Promise<CartEntity> {
+  async create(
+    userId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity> {
     const client: PrismaModelClient = (txClient || prisma) as PrismaClient;
     if (!userId) throw new Error("User ID is required");
 
@@ -199,19 +205,90 @@ export class CartRepository implements ICartRepository {
     return this.mapToCartEntity(cart);
   }
 
-  async addItem(dto: AddToCartDTO, userId: string): Promise<CartEntity> {
+  // --- Guest User Cart Methods ---
+
+  async findByGuestId(
+    guestId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity | null> {
+    const client: PrismaModelClient = (txClient || prisma) as PrismaClient;
+    if (!guestId) throw new Error("Guest ID is required");
+
+    const cart = await client.cart.findFirst({
+      where: { guestId, status: CartStatus.ACTIVE },
+      include: {
+        items: {
+          include: {
+            productVariation: {
+              include: {
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return cart ? this.mapToCartEntity(cart) : null;
+  }
+
+  async createGuestCart(
+    guestId: string,
+    txClient?: PrismaClientOrTransaction
+  ): Promise<CartEntity> {
+    const client: PrismaModelClient = (txClient || prisma) as PrismaClient;
+    if (!guestId) throw new Error("Guest ID is required");
+
+    const cart = await client.cart.create({
+      data: {
+        guestId,
+        status: CartStatus.ACTIVE,
+        totalAmount: 0,
+        totalItems: 0,
+        lastActivity: new Date(),
+      },
+      include: {
+        items: {
+          include: {
+            productVariation: {
+              include: {
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return this.mapToCartEntity(cart);
+  }
+
+  // --- Unified Add Item (for both user and guest) ---
+  async addItem(dto: AddToCartDTO, identifier: string, isGuest: boolean): Promise<CartEntity> {
     const { productVariationId, quantity } = dto;
-    if (!userId) throw new Error("User ID is required");
-    if (!productVariationId) throw new Error("Product variation ID is required");
+    if (!identifier) throw new Error("Identifier (User ID or Guest ID) is required");
+    if (!productVariationId)
+      throw new Error("Product variation ID is required");
     if (quantity <= 0) {
       throw new Error("Quantity must be greater than 0");
     }
 
     return await prisma.$transaction(async (tx) => {
-      // Pass the transaction client 'tx' to findByUserId
-      const cart = await this.findByUserId(userId, tx);
+      let cart: CartEntity | null;
+      if (isGuest) {
+        cart = await this.findByGuestId(identifier, tx);
+        if (!cart) {
+          cart = await this.createGuestCart(identifier, tx);
+        }
+      } else {
+        cart = await this.findByUserId(identifier, tx);
+        if (!cart) {
+          cart = await this.create(identifier, tx);
+        }
+      }
+
       if (!cart) {
-        throw new Error("Cart not found");
+        throw new Error("Cart not found or could not be created");
       }
 
       const productVariation = await tx.productVariation.findUnique({
@@ -227,7 +304,6 @@ export class CartRepository implements ICartRepository {
         throw new Error("Insufficient stock");
       }
 
-      // Decrease stock
       await tx.productVariation.update({
         where: { id: productVariationId },
         data: { stock: productVariation.stock - quantity },
@@ -252,7 +328,10 @@ export class CartRepository implements ICartRepository {
           },
           data: {
             quantity: existingItem.quantity + quantity,
-            price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+            price:
+              productVariation.salePrice > 0
+                ? productVariation.salePrice
+                : productVariation.price,
           },
         });
       } else {
@@ -260,21 +339,27 @@ export class CartRepository implements ICartRepository {
           data: {
             cartId: cart.id,
             productVariationId,
-            productId:productVariation.productId,
+            productId: productVariation.productId,
             quantity,
-            price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+            price:
+              productVariation.salePrice > 0
+                ? productVariation.salePrice
+                : productVariation.price,
           },
         });
       }
 
-      // Use the helper to update cart totals, passing the transaction client 'tx'
       return this.updateCartTotals(cart.id, tx);
     });
   }
 
+  async addItemToGuestCart(dto: GuestCartDTO): Promise<CartEntity> {
+    const { guestId, productVariationId, quantity } = dto;
+    return this.addItem({ productVariationId, quantity }, guestId, true);
+  }
+
   async updateItem(dto: UpdateCartItemDTO): Promise<CartEntity> {
     const { cartItemId, quantity } = dto;
-
     if (!cartItemId) throw new Error("Cart item ID is required");
 
     return await prisma.$transaction(async (tx) => {
@@ -289,7 +374,6 @@ export class CartRepository implements ICartRepository {
 
       if (quantity <= 0) {
         await tx.cartItem.delete({ where: { id: cartItemId } });
-        // Return stock to product variation
         await tx.productVariation.update({
           where: { id: cartItem.productVariationId },
           data: { stock: cartItem.productVariation.stock + cartItem.quantity },
@@ -300,23 +384,23 @@ export class CartRepository implements ICartRepository {
           throw new Error("Insufficient stock");
         }
 
-        // Adjust stock for the difference in quantity
         await tx.productVariation.update({
           where: { id: cartItem.productVariationId },
           data: { stock: cartItem.productVariation.stock - quantityDiff },
         });
 
-        // Update the cart item quantity and price
         await tx.cartItem.update({
           where: { id: cartItemId },
           data: {
             quantity,
-            price: cartItem.productVariation.salePrice > 0 ? cartItem.productVariation.salePrice : cartItem.productVariation.price,
+            price:
+              cartItem.productVariation.salePrice > 0
+                ? cartItem.productVariation.salePrice
+                : cartItem.productVariation.price,
           },
         });
       }
 
-      // Use the helper to update cart totals, passing the transaction client 'tx'
       return this.updateCartTotals(cartItem.cartId, tx);
     });
   }
@@ -336,36 +420,31 @@ export class CartRepository implements ICartRepository {
         throw new Error("Cart item not found");
       }
 
-      // Delete the cart item
       await tx.cartItem.delete({ where: { id: cartItemId } });
 
-      // Return stock to product variation
       await tx.productVariation.update({
         where: { id: cartItem.productVariationId },
         data: { stock: cartItem.productVariation.stock + cartItem.quantity },
       });
 
-      // Use the helper to update cart totals, passing the transaction client 'tx'
       return this.updateCartTotals(cartItem.cartId, tx);
     });
   }
 
-  // Changed to accept userId for consistency with other user-bound operations
-  async clearCart(userId: string): Promise<CartEntity> {
-    if (!userId) throw new Error("User ID is required");
+  async clearCart(identifier: string, isGuest: boolean): Promise<CartEntity> {
+    if (!identifier) throw new Error("Identifier is required");
 
     return await prisma.$transaction(async (tx) => {
-      // Find the cart by userId first
+      const whereClause = isGuest ? { guestId: identifier } : { userId: identifier };
       const cart = await tx.cart.findFirst({
-        where: { userId, status: CartStatus.ACTIVE },
-        include: { items: { include: { productVariation: true } } }, // Include items to return stock
+        where: { ...whereClause, status: CartStatus.ACTIVE },
+        include: { items: { include: { productVariation: true } } },
       });
 
       if (!cart) {
-        throw new Error("Cart not found for this user");
+        throw new Error("Cart not found for this identifier");
       }
 
-      // Return stock for all items in the cart
       for (const item of cart.items) {
         await tx.productVariation.update({
           where: { id: item.productVariationId },
@@ -373,22 +452,22 @@ export class CartRepository implements ICartRepository {
         });
       }
 
-      // Delete all cart items for this cart
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-      // Use the helper to update cart totals (which will now be 0 items, 0 amount), passing 'tx'
       return this.updateCartTotals(cart.id, tx);
     });
   }
 
-  async getCartWithItems(userId: string): Promise<CartEntity | null> {
-    if (!userId) throw new Error("User ID is required");
+  async getCartWithItems(
+    identifier: string,
+    isGuest: boolean
+  ): Promise<CartEntity | null> {
+    if (!identifier) throw new Error("Identifier is required");
 
-    // This is a read-only operation, so direct prisma client is fine.
-    // If you need it to be part of an *optional* larger transaction,
-    // you would add txClient parameter and use (txClient || prisma).
+    const whereClause = isGuest ? { guestId: identifier } : { userId: identifier };
+
     const cart = await prisma.cart.findFirst({
-      where: { userId, status: CartStatus.ACTIVE },
+      where: { ...whereClause, status: CartStatus.ACTIVE },
       include: {
         items: {
           include: {
@@ -403,5 +482,102 @@ export class CartRepository implements ICartRepository {
     });
 
     return cart ? this.mapToCartEntity(cart) : null;
+  }
+
+  async mergeGuestCart(dto: MergeGuestCartDTO): Promise<CartEntity> {
+    const { guestId, userId } = dto;
+    if (!guestId || !userId) {
+      throw new Error("Guest ID and User ID are required for merging carts.");
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      const guestCart = await tx.cart.findFirst({
+        where: { guestId, status: CartStatus.ACTIVE },
+        include: { items: true },
+      });
+
+      if (!guestCart) {
+        throw new Error("Guest cart not found or is not active.");
+      }
+
+      let userCart = await tx.cart.findFirst({
+        where: { userId, status: CartStatus.ACTIVE },
+        include: { items: true },
+      });
+
+      if (!userCart) {
+        // Create a new cart for the user if they don't have one
+        userCart = await tx.cart.create({
+          data: {
+            userId,
+            status: CartStatus.ACTIVE,
+            totalAmount: 0,
+            totalItems: 0,
+          },
+          // FIX: Include items here so the type matches expectations
+          include: { 
+            items: { 
+              include: { 
+                productVariation: { 
+                  include: { images: true } 
+                } 
+              } 
+            } 
+          },
+        });
+      }
+
+      for (const guestItem of guestCart.items) {
+        // FIX: Ensure userCart is treated as non-null here.
+        // The include in create above should resolve the type issue,
+        // but if TypeScript still complains, a non-null assertion (!) can be used.
+        const existingUserItem = userCart.items.find( 
+          (item) => item.productVariationId === guestItem.productVariationId
+        );
+
+        const productVariation = await tx.productVariation.findUnique({
+          where: { id: guestItem.productVariationId },
+        });
+
+        if (!productVariation) {
+          // Skip if product variation not found, or handle as an error/log
+          continue;
+        }
+
+        if (existingUserItem) {
+          // Update quantity for existing item in user cart
+          await tx.cartItem.update({
+            where: { id: existingUserItem.id },
+            data: {
+              quantity: existingUserItem.quantity + guestItem.quantity,
+              // Update price to current, in case it changed
+              price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+            },
+          });
+        } else {
+          // Create new item in user cart
+          await tx.cartItem.create({
+            data: {
+              cartId: userCart.id,
+              productVariationId: guestItem.productVariationId,
+              productId: guestItem.productId, // Make sure productId is transferred
+              quantity: guestItem.quantity,
+              price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+            },
+          });
+        }
+        // No need to update stock here as stock was already reduced when item was added to guest cart
+        // If you want to handle stock on merge, you'd need to consider if user already had the item
+      }
+
+      // Deactivate the guest cart after merging
+      await tx.cart.update({
+        where: { id: guestCart.id },
+        data: { status: CartStatus.COMPLETED }, // Or 'ABANDONED', or delete if preferred
+      });
+
+      // Recalculate and update the user's cart totals
+      return this.updateCartTotals(userCart.id, tx);
+    });
   }
 }

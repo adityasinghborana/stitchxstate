@@ -1,6 +1,6 @@
-'use client';
-import { create } from 'zustand';
-import { userResponseDto } from '@/core/dtos/User.dto'; // Adjust import
+"use client";
+import { create } from "zustand";
+import { userResponseDto } from "@/core/dtos/User.dto"; // Adjust import
 
 interface User {
   email: string;
@@ -19,6 +19,7 @@ interface AuthState {
   login: (user: User) => void;
   logout: () => Promise<void>;
   initializeAuth: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -28,33 +29,33 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   error: null,
 
-  login: ( user) => {
+  login: (user) => {
     set({ isAuthenticated: true, user, error: null });
   },
 
   logout: async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
       });
       set({ isAuthenticated: false, user: null, error: null });
     } catch (e) {
-      console.error('Logout failed:', e);
-      set({ error: 'Logout failed' });
+      console.error("Logout failed:", e);
+      set({ error: "Logout failed" });
     }
   },
 
   initializeAuth: async () => {
     set({ isLoading: true });
     try {
-      const response = await fetch('/api/users/me', {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/users/me", {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
-        const data: { user: userResponseDto} = await response.json();
+        const data: { user: userResponseDto } = await response.json();
         set({
           isAuthenticated: true,
           user: {
@@ -68,11 +69,26 @@ export const useAuthStore = create<AuthState>((set) => ({
           error: null,
         });
       } else {
-        set({ isAuthenticated: false, user: null, isLoading: false, error: null });
+        set({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          error: null,
+        });
       }
     } catch (e) {
-      console.error('Failed to initialize auth:', e);
-      set({ isAuthenticated: false, user: null, token: null, isLoading: false, error: 'Failed to initialize auth' });
+      console.error("Failed to initialize auth:", e);
+      set({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        isLoading: false,
+        error: "Failed to initialize auth",
+      });
     }
+  },
+
+  updateUser: (user: User) => {
+    set({ user });
   },
 }));

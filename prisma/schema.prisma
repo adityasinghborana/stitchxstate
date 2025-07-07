@@ -4,7 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,39 +14,42 @@ datasource db {
 }
 
 model User {
+  id           String    @id @default(cuid())
+  firstName    String?
+  lastName     String?
+  email        String    @unique
+  password     String?
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  orders       Order[]
+  isAdmin      Boolean   @default(false)
+  otp          String?
+  otpExpiresAt DateTime?
+  carts        Cart[]
+}
+
+model HomePage {
+  id             String   @id @default(cuid())
+  sections       Json //Prisma to store the sections field as a JSON document in your database
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  seoTitle       String?
+  seoDescription String?
+}
+
+model Header {
   id        String   @id @default(cuid())
-  firstName String?
-  lastName  String?
-  email     String   @unique
-  password  String?
-  phone     String?
+  sections  Json //Prisma to store the sections field as a JSON document in your database
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  orders    Order[]
-  isAdmin   Boolean  @default(false)
-  otp       String?
-  otpExpiresAt DateTime?
-  carts     Cart[]
 }
-model HomePage{
-  id        String    @id @default(cuid())
-  sections  Json      //Prisma to store the sections field as a JSON document in your database
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  seoTitle        String?
-  seoDescription  String?
-}
-model Header{
-  id        String    @id @default(cuid())
-  sections  Json      //Prisma to store the sections field as a JSON document in your database
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-model Footer{
-  id        String    @id @default(cuid())
-  sections  Json      //Prisma to store the sections field as a JSON document in your database
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+
+model Footer {
+  id        String   @id @default(cuid())
+  sections  Json //Prisma to store the sections field as a JSON document in your database
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
@@ -58,27 +60,27 @@ model Product {
   updatedAt      DateTime           @updatedAt
   variations     ProductVariation[]
   categories     Category[]         @relation("ProductToCategory")
-  thumbnailVideo String             @default("")     
+  thumbnailVideo String             @default("")
   galleryImages  GalleryImage[]
   cartItems      CartItem[]
-  seoTitle        String?
-  seoDescription  String?
+  seoTitle       String?
+  seoDescription String?
 }
 
 model ProductVariation {
-  id        String   @id @default(cuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  size      String
-  color     String
-  price     Float
-  salePrice Float     @default(0.0)  
-  stock     Int
-  images    ProductImage[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  cartItems CartItem[]
-  orderItems OrderItem[] @relation("ProductVariationToOrderItem")
+  id         String         @id @default(cuid())
+  productId  String
+  product    Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size       String
+  color      String
+  price      Float
+  salePrice  Float          @default(0.0)
+  stock      Int
+  images     ProductImage[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  cartItems  CartItem[]
+  orderItems OrderItem[]    @relation("ProductVariationToOrderItem")
 
   @@unique([productId, size, color])
 }
@@ -90,24 +92,24 @@ model ProductImage {
   productVariation   ProductVariation @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
   createdAt          DateTime         @default(now())
 }
+
 model GalleryImage {
-  id                 String           @id @default(cuid())
-  url                String
+  id        String   @id @default(cuid())
+  url       String
   productId String
-  product            Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt          DateTime         @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model Category {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  products  Product[] @relation("ProductToCategory")
-  createdAt DateTime  @default(now())
-  imageUrl    String?
-  seoTitle        String?
-  seoDescription  String?
+  id             String    @id @default(cuid())
+  name           String    @unique
+  products       Product[] @relation("ProductToCategory")
+  createdAt      DateTime  @default(now())
+  imageUrl       String?
+  seoTitle       String?
+  seoDescription String?
 }
-
 
 model Order {
   id              String      @id @default(cuid())
@@ -129,29 +131,31 @@ model OrderItem {
   id                 String           @id @default(cuid())
   orderId            String
   order              Order            @relation(fields: [orderId], references: [id])
-  productVariationId String          
-  productVariation   ProductVariation @relation("ProductVariationToOrderItem", fields: [productVariationId], references: [id]) 
+  productVariationId String
+  productVariation   ProductVariation @relation("ProductVariationToOrderItem", fields: [productVariationId], references: [id])
   quantity           Int
-  price              Float            
+  price              Float
   createdAt          DateTime         @default(now())
 
   @@unique([orderId, productVariationId]) // Unique constraint: one variation per order
 }
+
 model Coupon {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  discount    Float // Can be a percentage or a fixed amount
-  type        String // "PERCENTAGE" or "FIXED"
-  expiresAt   DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  orders      Order[]
+  id        String   @id @default(cuid())
+  code      String   @unique
+  discount  Float // Can be a percentage or a fixed amount
+  type      String // "PERCENTAGE" or "FIXED"
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  orders    Order[]
 }
 
 model Cart {
-  id           String     @id @default(cuid()) 
-  userId       String?   
-  user         User?      @relation(fields: [userId], references: [id]) 
+  id           String     @id @default(cuid())
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id])
+  guestId      String?
   status       String     @default("active") // e.g., "active", "abandoned", "converted_to_order"
   items        CartItem[]
   createdAt    DateTime   @default(now())
@@ -162,19 +166,19 @@ model Cart {
 }
 
 model CartItem {
-  id                 String           @id @default(cuid()) 
-  cartId             String          
-  cart               Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade) 
+  id     String @id @default(cuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
-  productVariationId String           
-  productVariation   ProductVariation @relation(fields: [productVariationId], references: [id]) 
+  productVariationId String
+  productVariation   ProductVariation @relation(fields: [productVariationId], references: [id])
   productId          String
   product            Product          @relation(fields: [productId], references: [id])
   quantity           Int              @default(1)
-  price              Float            
+  price              Float
 
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Composite unique constraint to ensure a specific product variation appears only once per cart
   @@unique([cartId, productVariationId])

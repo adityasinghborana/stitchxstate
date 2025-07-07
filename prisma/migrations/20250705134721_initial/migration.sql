@@ -22,6 +22,8 @@ CREATE TABLE `HomePage` (
     `sections` JSON NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `seoTitle` VARCHAR(191) NULL,
+    `seoDescription` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -54,6 +56,8 @@ CREATE TABLE `Product` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `thumbnailVideo` VARCHAR(191) NOT NULL DEFAULT '',
+    `seoTitle` VARCHAR(191) NULL,
+    `seoDescription` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -100,6 +104,8 @@ CREATE TABLE `Category` (
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `imageUrl` VARCHAR(191) NULL,
+    `seoTitle` VARCHAR(191) NULL,
+    `seoDescription` VARCHAR(191) NULL,
 
     UNIQUE INDEX `Category_name_key`(`name`),
     PRIMARY KEY (`id`)
@@ -152,6 +158,7 @@ CREATE TABLE `Coupon` (
 CREATE TABLE `Cart` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NULL,
+    `guestId` VARCHAR(191) NULL,
     `status` VARCHAR(191) NOT NULL DEFAULT 'active',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -174,6 +181,30 @@ CREATE TABLE `CartItem` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `CartItem_cartId_productVariationId_key`(`cartId`, `productVariationId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AboutUs` (
+    `id` VARCHAR(191) NOT NULL,
+    `content` VARCHAR(191) NOT NULL,
+    `seoTitle` VARCHAR(191) NULL,
+    `seoDescription` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ContactUs` (
+    `id` VARCHAR(191) NOT NULL,
+    `content` VARCHAR(191) NOT NULL,
+    `seoTitle` VARCHAR(191) NULL,
+    `seoDescription` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

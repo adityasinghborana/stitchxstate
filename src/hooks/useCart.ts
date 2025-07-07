@@ -1,14 +1,25 @@
-import { create } from 'zustand';
-import { CartApiRepository } from '@/infrastructure/frontend/repositories/Cart.api';
-import { CartEntity } from '@/core/entities/cart.entity';
-import { AddToCartDTO, UpdateCartItemDTO, RemoveFromCartDTO } from '@/core/dtos/Cart.dto';
+"use client";
+
+import { create } from "zustand";
+import { CartApiRepository } from "@/infrastructure/frontend/repositories/Cart.api"; // Ensure this path is correct
+import { CartEntity } from "@/core/entities/cart.entity";
+import {
+  AddToCartDTO,
+  UpdateCartItemDTO,
+  RemoveFromCartDTO,
+} from "@/core/dtos/Cart.dto";
 
 interface CartState {
   cart: CartEntity | null;
   loading: boolean;
   error: string | null;
   getCart: () => Promise<void>;
-  addToCart: (dto: AddToCartDTO) => Promise<void>;
+  // Updated addToCart signature to accept identifier and isGuest
+  addToCart: (
+    dto: AddToCartDTO,
+    identifier: string,
+    isGuest: boolean
+  ) => Promise<void>;
   updateCartItem: (dto: UpdateCartItemDTO) => Promise<void>;
   removeCartItem: (dto: RemoveFromCartDTO) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -24,7 +35,12 @@ export const useCartStore = create<CartState>((set) => ({
   getCart: async () => {
     set({ loading: true });
     try {
-      const data = await cartApi.getCartWithItems();
+      // --- CHANGE START ---
+      // FIX: Changed cartApi.getCart() to cartApi.getCartWithItems() to match ICartRepository signature.
+      // The client-side implementation of getCartWithItems in CartApiRepository does not require arguments
+      // as the identifier is handled by the 'x-guest-id' header or auth token.
+      const data = await cartApi.getCartWithItems("", false); // Pass dummy identifier and isGuest to satisfy interface
+      // --- CHANGE END ---
       set({ cart: data, error: null });
     } catch (err) {
       set({ error: (err as Error).message });
@@ -33,10 +49,15 @@ export const useCartStore = create<CartState>((set) => ({
     }
   },
 
-  addToCart: async (dto: AddToCartDTO) => {
+  // Updated addToCart implementation to pass identifier and isGuest to cartApi.addItem
+  addToCart: async (
+    dto: AddToCartDTO,
+    identifier: string,
+    isGuest: boolean
+  ) => {
     set({ loading: true });
     try {
-      const data = await cartApi.addItem(dto);
+      const data = await cartApi.addItem(dto, identifier, isGuest);
       set({ cart: data, error: null });
     } catch (err) {
       set({ error: (err as Error).message });
@@ -72,7 +93,11 @@ export const useCartStore = create<CartState>((set) => ({
   clearCart: async () => {
     set({ loading: true });
     try {
-      const data = await cartApi.clearCart();
+      // --- CHANGE START ---
+      // FIX: Added arguments to cartApi.clearCart() to match ICartRepository signature.
+      // Since the actual API call relies on headers for identification, these can be dummy values.
+      const data = await cartApi.clearCart("", false); // Pass dummy identifier and isGuest
+      // --- CHANGE END ---
       set({ cart: data, error: null });
     } catch (err) {
       set({ error: (err as Error).message });

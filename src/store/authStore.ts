@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await fetch("/api/auth/logout", {
+      await fetch("/api/logout", {
         method: "POST",
         credentials: "include",
       });

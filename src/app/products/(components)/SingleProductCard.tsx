@@ -16,11 +16,9 @@ import { AddToCartDTO } from "@/core/dtos/Cart.dto";
 import { getCurrentUser } from "@/lib/auth"; // Assuming this gets user from auth system
 import { useRouter } from "next/navigation";
 import { OrderApiRepository } from "@/infrastructure/frontend/repositories/OrderRepository.api";
-// --- CHANGE START ---
-// Import CartApiRepository for client-side guest ID management
 import { CartApiRepository } from "@/infrastructure/frontend/repositories/Cart.api";
-// --- CHANGE END ---
-
+import { trackEvent } from "@/lib/trackEvent";
+import { usePathname } from "next/navigation";
 interface SingleProductCardProps {
   product: ProductEntity;
 }
@@ -51,9 +49,8 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   const { addToCart, getCart, cart } = useCartStore();
   const router = useRouter();
   const orderApi = useMemo(() => new OrderApiRepository(), []);
-  // --- CHANGE START ---
   const cartApi = useMemo(() => new CartApiRepository(), []); // Initialize CartApiRepository
-  // --- CHANGE END ---
+  const pathname = usePathname();
   const videoPosterImageUrl =
     product.galleryImages && product.galleryImages.length > 0
       ? product.galleryImages[0].url
@@ -81,6 +78,7 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     email: string;
+    phone: string;
   } | null>(null);
   // --- CHANGE START ---
   // Helper functions for guest ID management (can be moved to a shared utility if needed elsewhere)
@@ -88,6 +86,13 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
   const setGuestIdToLocalStorage = (guestId: string) =>
     localStorage.setItem("guestId", guestId);
   // --- CHANGE END ---
+  // --- NEW: Helper to generate a unique event ID for deduplication ---
+  // This is crucial for matching client-side and server-side events.
+  const generateUniqueEventId = (prefix: string) => {
+    return `${prefix}_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 9)}`;
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -103,6 +108,63 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
     }
   }, [isSidebar, cart, getCart]);
 
+  useEffect(() => {
+    if (product) {
+      const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+      if (!pixelId) {
+        console.warn(
+          "NEXT_PUBLIC_META_PIXEL_ID is not set. Meta Pixel 'ViewContent' event will not fire."
+        );
+        return;
+      }
+      const viewContentEventId = generateUniqueEventId("view_content");
+      // Determine the price to use for the ViewContent event
+      const priceToUseForView =
+        selectedVariation?.price || product.variations?.[0]?.price || 0;
+      trackEvent(
+        "ViewContent",
+        {
+          content_name: product.name,
+          content_category: Array.isArray(product.categories)
+            ? product.categories.map((c) => c.name).join(",")
+            : product.categories, // Assuming product.category exists and has a 'name'
+          content_ids: [product.id], // Using product.id for ViewContent as it's the main product
+          content_type: "product",
+          value: priceToUseForView,
+          currency: "INR", // Adjust currency as per your store's currency
+        },
+        viewContentEventId // Pass the generated event ID
+      );
+      console.log("[Client-side Pixel] ViewContent event triggered.");
+      const sendCapiViewContent = async () => {
+        try {
+          await fetch("/api/meta-capi", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              event_name: "ViewContent",
+              event_id: viewContentEventId, // Use the same ID for deduplication
+              // Include user PII if available and relevant for matching ViewContent
+              email: currentUser?.email,
+              phone: currentUser?.phone,
+              value: priceToUseForView,
+              currency: "INR",
+              content_ids: [product.id],
+              content_type: "product",
+              // Optional: You could pass page details for context if your CAPI route accepts them
+              // page_title: document.title,
+              // page_url: window.location.href,
+            }),
+          });
+          console.log("[Server-side CAPI] ViewContent event sent.");
+        } catch (err) {
+          console.error("[Server-side CAPI] Failed to send ViewContent:", err);
+        }
+      };
+      // Only call if you explicitly want server-side ViewContent
+      // sendCapiViewContent(); // You can uncomment this line to enable server-side ViewContent
+    }
+  }, [product, selectedVariation, pathname, currentUser]);
   const handleVariationChange = (variation: ProductVariationEntity) => {
     setSelectedVariation(variation);
     if (variation.images.length > 0) {
@@ -160,6 +222,11 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
 
   const handleAddToCart = async () => {
     if (!selectedVariation || !isInStock) return;
+    const addToCartEventId = generateUniqueEventId("add_to_cart"); // Kyun: AddToCart event ke liye unique ID banayi.
+    const itemPrice =
+      selectedVariation.salePrice && selectedVariation.salePrice > 0
+        ? selectedVariation.salePrice
+        : selectedVariation.price;
 
     // --- CHANGE START ---
     let identifier: string;
@@ -204,7 +271,44 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
       productVariationId: selectedVariation.id,
       quantity: 1,
     };
-
+    trackEvent(
+      "AddToCart", // Kyun: Event ka naam "AddToCart".
+      {
+        content_name: product.name,
+        content_category: Array.isArray(product.categories)
+          ? product.categories.map((c) => c.name).join(",")
+          : product.categories, // Kyun: Product category.
+        content_ids: [selectedVariation.id], // Kyun: Selected product variation ki ID.
+        content_type: "product",
+        value: itemPrice,
+        currency: "INR",
+      },
+      addToCartEventId // Kyun: Unique ID yahan pass ki, deduplication ke liye.
+    );
+    console.log("[Client-side Pixel] AddToCart event triggered.");
+    try {
+      await fetch("/api/meta-capi", {
+        // Kyun: Apne banaye hue server-side API route ko call kiya.
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_name: "AddToCart",
+          event_id: addToCartEventId,
+          email: currentUser?.email,
+          phone: currentUser?.phone,
+          value: itemPrice,
+          currency: "INR",
+          content_ids: [selectedVariation.id],
+          content_type: "product",
+        }),
+      });
+      console.log("[Server-side CAPI] AddToCart event sent to CAPI.");
+    } catch (err) {
+      console.error(
+        "[Server-side CAPI] Failed to send AddToCart event to CAPI:",
+        err
+      );
+    }
     try {
       // Pass identifier and isGuest to the useCartStore's addToCart action
       await addToCart(dto, identifier, isGuest);

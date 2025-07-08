@@ -20,17 +20,17 @@ const orderUseCase = new OrderUseCase(
 
 export async function GET(req: NextRequest) {
   try {
-    const auth = await validateAuth(req);
+    // const auth = await validateAuth(req);
 
-    if (auth instanceof NextResponse) return auth;
+    // if (auth instanceof NextResponse) return auth;
 
-    const userId = auth.userId;
-    if (!userId) {
-      return NextResponse.json(
-        { message: "User ID is required." },
-        { status: 401 }
-      );
-    }
+    // const userId = auth.userId;
+    // if (!userId) {
+    //   return NextResponse.json(
+    //     { message: "User ID is required." },
+    //     { status: 401 }
+    //   );
+    // }
 
     // Use the new use case to fetch all orders (admin check is inside)
     const orders = await orderUseCase.getAllOrdersForAdmin();
@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error("Error fetching all orders:", error);
 
-    if (error.message.includes("Unauthorized")) {
-      return NextResponse.json({ message: error.message }, { status: 403 }); // Forbidden
-    }
+    // if (error.message.includes("Unauthorized")) {
+    //   return NextResponse.json({ message: error.message }, { status: 403 }); // Forbidden
+    // }
 
     return NextResponse.json(
       {

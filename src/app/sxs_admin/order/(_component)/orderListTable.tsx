@@ -177,13 +177,13 @@ export default function OrderListTable({ order }: OrdersListTableProps) {
                     View Details
                   </button>
                 </Link>
-                <button
+                {/* <button
                   onClick={() => handleDelete(orderItem.id)}
                   className="text-red-600 hover:text-red-900"
                   disabled={updatingStatus === orderItem.id}
                 >
                   Delete
-                </button>
+                </button> */}
               </td>
             </tr>
           ))}

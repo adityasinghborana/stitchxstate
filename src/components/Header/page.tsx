@@ -157,7 +157,9 @@ const Header = ({ header }: HeaderProps) => {
                   <Link href={"/profile/orders"}>My order</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>wishlist</DropdownMenuItem>
-                <DropdownMenuItem>help</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/profile/help">help</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>logout</DropdownMenuItem>
               </DropdownMenuContent>
             )}

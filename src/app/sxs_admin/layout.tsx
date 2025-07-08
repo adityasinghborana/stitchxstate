@@ -167,6 +167,48 @@ export default function AdminLayout({
         </svg>
       ),
     },
+    {
+      label: "orders",
+      href: "/sxs_admin/order",
+      icon: (
+        // Homepage Icon
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+          stroke="currentColor"
+          className="w-6 h-6 shrink-0 text-neutral-700 dark:text-neutral-200"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 2a1 1 0 00-1 1v17.586a1 1 0 001.707.707L9 19.414l2.293 2.293a1 1 0 001.414 0L15 19.414l2.293 2.293A1 1 0 0019 20.586V3a1 1 0 00-1-1H6z"
+          />
+        </svg>
+      ),
+    },
+    {
+      label: "Queries",
+      href: "/sxs_admin/help-queries",
+      icon: (
+        // Homepage Icon
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+          stroke="currentColor"
+          className="w-6 h-6 shrink-0 text-neutral-700 dark:text-neutral-200"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 18h.01M12 14a4 4 0 100-8 4 4 0 000 8zm0 0v2"
+          />
+        </svg>
+      ),
+    },
   ];
 
   useEffect(() => {

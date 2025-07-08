@@ -33,7 +33,11 @@ export interface ICartRepository {
     userId: string,
     txClient?: PrismaClientOrTransaction
   ): Promise<CartEntity>;
- addItem(dto: AddToCartDTO, identifier: string, isGuest: boolean): Promise<CartEntity>;// This method will be updated to handle guestId too
+  addItem(
+    dto: AddToCartDTO,
+    identifier: string,
+    isGuest: boolean
+  ): Promise<CartEntity>; // This method will be updated to handle guestId too
   updateItem(dto: UpdateCartItemDTO): Promise<CartEntity>;
   removeItem(dto: RemoveFromCartDTO): Promise<CartEntity>;
   clearCart(identifier: string, isGuest: boolean): Promise<CartEntity>; // Modified to accept identifier and a flag
@@ -69,7 +73,7 @@ export class CartRepository implements ICartRepository {
         productVariationId: item.productVariationId,
         productVariation: {
           id: item.productVariation.id,
-          productId: item.productVariation.productId ?? undefined,
+          productId: item.productId ?? undefined,
           size: item.productVariation.size,
           color: item.productVariation.color,
           price: item.productVariation.price,
@@ -160,8 +164,18 @@ export class CartRepository implements ICartRepository {
       where: { userId, status: CartStatus.ACTIVE },
       include: {
         items: {
-          include: {
+          // Explicitly select the fields you need from CartItem
+          select: {
+            id: true,
+            cartId: true,
+            productId: true, // <--- ADD THIS LINE
+            productVariationId: true,
+            quantity: true,
+            price: true,
+            createdAt: true,
+            updatedAt: true,
             productVariation: {
+              // Still include the relation
               include: {
                 images: true,
               },
@@ -264,9 +278,14 @@ export class CartRepository implements ICartRepository {
   }
 
   // --- Unified Add Item (for both user and guest) ---
-  async addItem(dto: AddToCartDTO, identifier: string, isGuest: boolean): Promise<CartEntity> {
+  async addItem(
+    dto: AddToCartDTO,
+    identifier: string,
+    isGuest: boolean
+  ): Promise<CartEntity> {
     const { productVariationId, quantity } = dto;
-    if (!identifier) throw new Error("Identifier (User ID or Guest ID) is required");
+    if (!identifier)
+      throw new Error("Identifier (User ID or Guest ID) is required");
     if (!productVariationId)
       throw new Error("Product variation ID is required");
     if (quantity <= 0) {
@@ -435,7 +454,9 @@ export class CartRepository implements ICartRepository {
     if (!identifier) throw new Error("Identifier is required");
 
     return await prisma.$transaction(async (tx) => {
-      const whereClause = isGuest ? { guestId: identifier } : { userId: identifier };
+      const whereClause = isGuest
+        ? { guestId: identifier }
+        : { userId: identifier };
       const cart = await tx.cart.findFirst({
         where: { ...whereClause, status: CartStatus.ACTIVE },
         include: { items: { include: { productVariation: true } } },
@@ -464,7 +485,9 @@ export class CartRepository implements ICartRepository {
   ): Promise<CartEntity | null> {
     if (!identifier) throw new Error("Identifier is required");
 
-    const whereClause = isGuest ? { guestId: identifier } : { userId: identifier };
+    const whereClause = isGuest
+      ? { guestId: identifier }
+      : { userId: identifier };
 
     const cart = await prisma.cart.findFirst({
       where: { ...whereClause, status: CartStatus.ACTIVE },
@@ -515,14 +538,14 @@ export class CartRepository implements ICartRepository {
             totalItems: 0,
           },
           // FIX: Include items here so the type matches expectations
-          include: { 
-            items: { 
-              include: { 
-                productVariation: { 
-                  include: { images: true } 
-                } 
-              } 
-            } 
+          include: {
+            items: {
+              include: {
+                productVariation: {
+                  include: { images: true },
+                },
+              },
+            },
           },
         });
       }
@@ -531,7 +554,7 @@ export class CartRepository implements ICartRepository {
         // FIX: Ensure userCart is treated as non-null here.
         // The include in create above should resolve the type issue,
         // but if TypeScript still complains, a non-null assertion (!) can be used.
-        const existingUserItem = userCart.items.find( 
+        const existingUserItem = userCart.items.find(
           (item) => item.productVariationId === guestItem.productVariationId
         );
 
@@ -551,7 +574,10 @@ export class CartRepository implements ICartRepository {
             data: {
               quantity: existingUserItem.quantity + guestItem.quantity,
               // Update price to current, in case it changed
-              price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+              price:
+                productVariation.salePrice > 0
+                  ? productVariation.salePrice
+                  : productVariation.price,
             },
           });
         } else {
@@ -562,7 +588,10 @@ export class CartRepository implements ICartRepository {
               productVariationId: guestItem.productVariationId,
               productId: guestItem.productId, // Make sure productId is transferred
               quantity: guestItem.quantity,
-              price: productVariation.salePrice > 0 ? productVariation.salePrice : productVariation.price,
+              price:
+                productVariation.salePrice > 0
+                  ? productVariation.salePrice
+                  : productVariation.price,
             },
           });
         }

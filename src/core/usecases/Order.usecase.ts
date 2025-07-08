@@ -18,15 +18,13 @@ export class OrderUseCase {
     userId: string
   ): Promise<orderEntity> {
     const cart = await this.cartRepository.findByUserId(userId);
-
+    console.log("cart data", cart);
     if (!cart || cart.items.length === 0 || cart.userId !== userId) {
       throw new Error("Invalid or empty cart or unauthorized access.");
     }
 
     for (const cartItem of cart.items) {
-      const product = await this.productRepository.findById(
-        cartItem.productVariation.id
-      );
+      const product = await this.productRepository.findById(cartItem.productId);
       if (!product) {
         throw new Error(
           `Product with ID ${cartItem.productVariation.id} not found.`
@@ -49,10 +47,9 @@ export class OrderUseCase {
         );
       }
     }
-    const paymentSuccessful = await this.processPayment(
-      cart.totalAmount,
-      payload.paymentMethod
-    );
+    const paymentSuccessful = await this.processPayment(cart.totalAmount, {
+      method: payload.paymentMethod,
+    });
     if (!paymentSuccessful) {
       throw new Error("Payment failed. Please try again.");
     }
@@ -80,7 +77,7 @@ export class OrderUseCase {
       contactInfo: payload.contactInfo,
     });
 
-    await this.cartRepository.clearCart(cart.id);
+    await this.cartRepository.clearCart(userId, false);
 
     return newOrder;
   }

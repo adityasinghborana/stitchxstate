@@ -119,7 +119,7 @@ function CheckoutPageContent() {
             router.push("/products");
           }
         } else if (flowType === "cart") {
-          const fetchedCart = await cartApi.findByUserId();
+          const fetchedCart = await cartApi.findByUserId(currentUser.id);
           if (fetchedCart) {
             if (fetchedCart.userId === currentUser.id) {
               setCartData(fetchedCart);
@@ -311,7 +311,8 @@ function CheckoutPageContent() {
         );
         if (!newOrder) throw new Error("Failed to create order from cart.");
         finalOrderId = newOrder.id;
-        await cartApi.clearCart();
+
+        // await cartApi.clearCart(orderData,false);
       } else if (
         flowType === "buy-now" &&
         productVariationId &&

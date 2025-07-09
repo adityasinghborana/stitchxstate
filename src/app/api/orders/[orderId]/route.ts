@@ -120,15 +120,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+export async function PUT(req: NextRequest) {
   try {
     const auth = await validateAuth(req);
     if (auth instanceof NextResponse) return auth;
 
-    const { orderId } = params;
+    // Extract orderId from the URL path
+    const url = new URL(req.url);
+    // Assumes route is /api/orders/[orderId]
+    const segments = url.pathname.split("/");
+    const orderId = segments[segments.length - 1];
     if (!orderId) {
       return NextResponse.json(
         { message: "Order ID is required." },

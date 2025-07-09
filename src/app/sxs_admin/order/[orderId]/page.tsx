@@ -14,7 +14,11 @@ interface OrderDetailPageProps {
   };
 }
 
-const OrderDetailPage = async ({ params }: OrderDetailPageProps) => {
+export default async function OrderDetailPage({
+  params,
+}: {
+  params: Promise<{ orderId: string }>;
+}) {
   const { orderId } = await params;
   const orderRepository = new OrderRepository();
   const userRepository = new PrismaUserRepository();
@@ -53,6 +57,4 @@ const OrderDetailPage = async ({ params }: OrderDetailPageProps) => {
       <OrderDetailView order={order} />
     </div>
   );
-};
-
-export default OrderDetailPage;
+}

@@ -4,7 +4,7 @@ import React from 'react';
 import { FaUsers, FaOpencart, FaMoneyBillWave, FaShoppingCart, FaChartLine, FaBoxOpen, FaClipboardList, FaArrowUp, FaArrowDown } from "react-icons/fa";
 import { AiFillProduct } from "react-icons/ai";
 import { MdOutlineCategory } from "react-icons/md";
-import { DashboardDto, GrowthDataPoint } from '@/core/dtos/Dashboard.dto';
+import { DashboardDto, GrowthDataPoint, } from '@/core/dtos/Dashboard.dto';
 import { IconType } from "react-icons";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 

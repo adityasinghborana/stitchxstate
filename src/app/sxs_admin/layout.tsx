@@ -47,7 +47,7 @@ export default function AdminLayout({
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h3v-3m-3 3h3v-3m-3 0a1 1 0 011-1h3v-3m-3 3a1 1 0 001 1h3v-3m-3 0a1 1 0 011-1h3v-3m-3 3a1 1 0 001 1h3v-3m-3 0a1 1 0 011-1h3v-3m-3 3a1 1 0 001 1h3v-3m-3 0a1 1 0 011-1h3v-3"
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h3v-3m-3 3h3v-3m-3 0a1 1 0 011-1h3v-3m-3 3a1 1 0 001 1h3v-3m-3 0a1 1 0 011-1h3v-3m-3 3a1 1 0 001 1h3v-3m-3 0a1 1 0 011-1h3v-3"
           />
         </svg>
       ),
@@ -68,7 +68,7 @@ export default function AdminLayout({
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-3.75h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zM12 6v.75m0 3v.75m0 3v.75m0 3V18m-9-3.75h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zM12 6v.75m0 3v.75m0 3v.75m0 3V18m-9-3.75h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008z"
+            d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-3.75h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zM12 6v.75m0 3v.75m0 3v.75m0 3V18m-9-3.75h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008zm0 3h.008v.008H7.5v-.008z"
           />
         </svg>
       ),
@@ -205,6 +205,27 @@ export default function AdminLayout({
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M12 18h.01M12 14a4 4 0 100-8 4 4 0 000 8zm0 0v2"
+          />
+        </svg>
+      ),
+    },
+    {
+      label: "Customers",
+      href: "/sxs_admin/customers",
+      icon: (
+        // Users Icon (Inline SVG)
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+          stroke="currentColor"
+          className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-7a4 4 0 11-8 0 4 4 0 018 0zm6 10v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a6 6 0 016-6h6a6 6 0 016 6z"
           />
         </svg>
       ),

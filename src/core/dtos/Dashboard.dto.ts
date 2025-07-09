@@ -12,6 +12,7 @@ export interface GrowthDataPoint {
   revenue: number;
   orders: number;
 }
+
 export interface DashboardDto{
     totalSales:number;
     totalOrders:number;
@@ -26,6 +27,7 @@ export interface DashboardDto{
     totalProducts:number;
     totalcategories:number;
     recentOrders: RecentOrderSummary[];
+    
     topProducts: { id: string; name: string; totalRevenue: number }[];
     orderStatusBreakdown: Record<string, number>;
     growthHistory: GrowthDataPoint[];

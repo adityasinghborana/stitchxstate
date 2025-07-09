@@ -15,6 +15,7 @@ export class DashboarduseCase{
         const totalGrowth=await this.dashboardRepository.getGrowthMetrics();
         const stockAlerts= await this.dashboardRepository.getLowStockAlerts(5);
          const growthHistory = await this.dashboardRepository.getHistoricalGrowthData(6);
+     
         return{
             totalSales,
             totalOrders,
@@ -29,6 +30,7 @@ export class DashboarduseCase{
             topProducts,
             orderStatusBreakdown,
             growthHistory,
+           
         }
     }
 }

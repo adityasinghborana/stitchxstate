@@ -6,7 +6,7 @@ import { ProductFilters } from "@/components/ui/product-filters";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-
+import { slugifyProduct } from "@/lib/utils/slugify";
 interface ProductGridDisplayProps {
   products: ProductEntity[];
   categories: CategoryEntity[];
@@ -110,7 +110,7 @@ export default function ProductGridDisplay({
                 return (
                   <Link
                     key={product.id}
-                    href={`/products/${product.id}`}
+                    href={`/products/${slugifyProduct(product)}`}
                     className="block group relative bg-white rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
                   >
                     <div className="relative w-full h-80 bg-gray-100 flex items-center justify-center overflow-hidden">

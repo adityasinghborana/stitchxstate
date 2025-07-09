@@ -1,10 +1,10 @@
 // D:\Ecommerce_ogresto\stitchxstate\src\app\sxs_admin\categories\(component)\categoryListForm.tsx
 
-import { CategoryEntity } from '@/core/entities/category.entity';
-import React from 'react';
-import Link from 'next/link'; // For navigation
-import Image from 'next/image'; // For optimized images
-
+import { CategoryEntity } from "@/core/entities/category.entity";
+import React from "react";
+import Link from "next/link"; // For navigation
+import Image from "next/image"; // For optimized images
+import { slugifyCategory } from "@/lib/utils/slugify";
 interface CategoryListFormProps {
   categories: CategoryEntity[];
 }
@@ -23,7 +23,7 @@ const CategoryListForm = ({ categories }: CategoryListFormProps) => {
       {categories.map((category) => (
         <Link
           key={category.id}
-          href={`/category/${category.id}`}
+          href={`/category/${slugifyCategory(category)}`}
           className="block group"
         >
           <div className="relative overflow-hidden  shadow-md hover:shadow-lg transition-shadow duration-300 transform group-hover:scale-105">
@@ -32,9 +32,9 @@ const CategoryListForm = ({ categories }: CategoryListFormProps) => {
                 <Image
                   src={category.imageUrl}
                   alt={category.name}
-                  fill 
-                  style={{ objectFit: 'cover' }} 
-                  sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 25vw" 
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="transition-transform  duration-300 group-hover:scale-110"
                 />
               ) : (
@@ -51,7 +51,6 @@ const CategoryListForm = ({ categories }: CategoryListFormProps) => {
 
             {/* "Shop Now" Button Overlay (similar to the image) */}
             {/* You can add a discount percentage here if your CategoryEntity had it */}
-            
           </div>
         </Link>
       ))}

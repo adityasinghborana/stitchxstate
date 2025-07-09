@@ -27,6 +27,7 @@ model User {
   otp          String?
   otpExpiresAt DateTime?
   carts        Cart[]
+  // wishlistItems wishlists[]
 }
 
 model HomePage {
@@ -65,6 +66,7 @@ model Product {
   cartItems      CartItem[]
   seoTitle       String?
   seoDescription String?
+  // wishlistItems  wishlists[]
 }
 
 model ProductVariation {
@@ -208,3 +210,17 @@ model HelpQuery {
   userEmail String?
   createdAt DateTime @default(now())
 }
+
+// model wishlists {
+//   id        String   @id @default(cuid())
+//   userId    String? // Nullable for guest wishlists
+//   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   productId String 
+//   product   Product  @relation(fields: [productId], references: [id]) 
+//   guestId   String? // For unauthenticated users (e.g., stored in local storage)
+//   createdAt DateTime @default(now())
+
+//   @@unique([userId, productId])
+//   @@index([guestId])
+//   @@map("wishlists") // Table name in the database
+// }

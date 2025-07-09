@@ -7,12 +7,23 @@ import { GetAllCategoriesUseCase } from "@/core/usecases/GetAllCategory.usecase"
 import ProductGridDisplay from "../(component)/productGripDisplay";
 import Link from "next/link";
 
-export default async function ProductByCategoryPage({
-  params,
-}: {
-  params: Promise<{ categoryId: string }>;
-}) {
-  const { categoryId } = await params;
+// **No custom interfaces here to avoid conflicts with PageProps constraint.**
+
+export default async function ProductByCategoryPage(props: any) {
+  // <--- Changed props to 'any'
+  // Explicitly assert the type of params *inside* the function
+  const { params } = props as { params: { slug: string } }; // <--- Type assertion here
+
+  const slug = params.slug;
+  if (!slug) {
+    throw new Error("Missing category slug in route params");
+  }
+
+  const categoryId = slug.split("-").pop();
+
+  if (typeof categoryId !== "string" || !categoryId) {
+    throw new Error("Invalid category slug: missing ID or malformed slug.");
+  }
 
   // Initialize your repositories
   const productRepository = new ProductRepository();
@@ -27,7 +38,6 @@ export default async function ProductByCategoryPage({
     categoryRepository
   );
 
-  // 2. Use the new 'categoryId' variable here
   const [products, category, categories] = await Promise.all([
     getProductsByCategoryUseCase.execute(categoryId),
     getCategoryByIdUseCase.execute(categoryId),
@@ -39,7 +49,6 @@ export default async function ProductByCategoryPage({
     return (
       <div className="container mx-auto p-4 py-8 text-center text-red-500">
         <h1 className="text-3xl font-bold mb-4">Category Not Found</h1>
-        {/* This will now work correctly */}
         <p>The category with ID {categoryId} does not exist.</p>
         <Link
           href="/category"

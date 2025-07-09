@@ -4,7 +4,7 @@ import { ProductEntity } from "@/core/entities/product.entity";
 import { CategoryEntity } from "@/core/entities/category.entity";
 import Link from "next/link";
 import { Button } from "../ui/button";
-
+import { slugifyProduct } from "@/lib/utils/slugify";
 interface Props {
   products: ProductEntity[];
   categories: CategoryEntity[];
@@ -35,7 +35,7 @@ const Products = ({ products, categories }: Props) => {
           return (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
+              href={`/products/${slugifyProduct(product)}`}
               className="block group relative bg-white rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
             >
               <div className="relative w-full h-80 bg-gray-100 flex items-center justify-center overflow-hidden">

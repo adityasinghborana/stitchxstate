@@ -19,6 +19,12 @@ export interface userdetail {
   email: string;
   createdAt: Date;
 }
+export interface StockAlertItem {
+  id: string;
+  productName: string;
+  stock: number;
+  createdAt: Date;
+}
 
 export interface DashboardDto {
   totalSales: number;
@@ -31,7 +37,7 @@ export interface DashboardDto {
   };
   totalUsers: number;
   userDetail: userdetail[];
-  stockAlerts: Pick<ProductVariationEntity, "id" | "stock" | "createdAt">[];
+  stockAlerts: StockAlertItem[];
   totalProducts: number;
   totalcategories: number;
   recentOrders: RecentOrderSummary[];

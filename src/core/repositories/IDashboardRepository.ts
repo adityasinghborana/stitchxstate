@@ -8,17 +8,12 @@ import { PrismaUserRepository } from "./IUserRepository";
 import { IUserRepository } from "./IUserRepository";
 import { UserEntity } from "../entities/User.entity";
 import { GrowthDataPoint } from "../dtos/Dashboard.dto";
+import { StockAlertItem } from "../dtos/Dashboard.dto";
 interface TopProductData {
   id: string;
   name: string;
   totalRevenue: number;
   quantitySold: number;
-}
-
-interface StockAlertData {
-  id: string;
-  name: string;
-  stock: number;
 }
 export interface IDashboardRepository {
   getSalesAndOrderSummary(): Promise<{
@@ -35,11 +30,7 @@ export interface IDashboardRepository {
   getTotalItemsSold(): Promise<number>;
   getUserById(userId: string): Promise<UserEntity | null>;
   getGrowthMetrics(): Promise<{ revenueGrowth: string; orderGrowth: string }>;
-  getLowStockAlerts(
-    threshold: number
-  ): Promise<
-    Pick<ProductVariationEntity, "id" | "price" | "createdAt" | "stock">[]
-  >;
+  getLowStockAlerts(threshold: number): Promise<StockAlertItem[]>;
   getHistoricalGrowthData(periods: number): Promise<GrowthDataPoint[]>;
 }
 export class DashboardRepository implements IDashboardRepository {
@@ -216,16 +207,30 @@ export class DashboardRepository implements IDashboardRepository {
     const orderGrowth = calculateGrowth(currentMonthOrder, lastMonthOrders);
     return { revenueGrowth, orderGrowth };
   }
-  async getLowStockAlerts(
-    threshold: number
-  ): Promise<
-    Pick<ProductVariationEntity, "id" | "price" | "createdAt" | "stock">[]
-  > {
-    return prisma.productVariation.findMany({
+  async getLowStockAlerts(threshold: number): Promise<StockAlertItem[]> {
+    const lowStockVariations = await prisma.productVariation.findMany({
       where: { stock: { lte: threshold } },
-      select: { id: true, price: true, stock: true, createdAt: true },
+      select: {
+        id: true,
+        stock: true,
+        createdAt: true,
+        // Select the related product's name
+        product: {
+          select: {
+            name: true,
+          },
+        },
+        // If you need price in StockAlertItem, add it here too:
+        // price: true,
+      },
       orderBy: { stock: "asc" },
     });
+    return lowStockVariations.map((variation) => ({
+      id: variation.id,
+      productName: variation.product?.name || "Unknown Product",
+      stock: variation.stock,
+      createdAt: variation.createdAt,
+    }));
   }
   async getHistoricalGrowthData(
     periods: number = 6

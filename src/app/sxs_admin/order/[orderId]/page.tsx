@@ -7,7 +7,7 @@ import { OrderUseCase } from "@/core/usecases/Order.usecase";
 import OrderDetailView from "../(_component)/orderDetailview";
 import { orderEntity } from "@/core/entities/order.entity";
 import { notFound } from "next/navigation";
-import { useAuthStore } from "@/store/authStore";
+import { ScrollArea } from "@/components/ui/scroll-area";
 interface OrderDetailPageProps {
   params: {
     orderId: string;
@@ -53,8 +53,9 @@ export default async function OrderDetailPage({
         <h1 className="text-3xl font-bold text-gray-900">Order Details</h1>
         <p className="text-gray-600">Order ID: {orderId}</p>
       </div>
-
-      <OrderDetailView order={order} />
+      <ScrollArea className="h-[80vh] w-full ">
+        <OrderDetailView order={order} />
+      </ScrollArea>
     </div>
   );
 }

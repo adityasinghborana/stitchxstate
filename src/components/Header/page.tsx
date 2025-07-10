@@ -150,16 +150,22 @@ const Header = ({ header }: HeaderProps) => {
               <DropdownMenuContent>
                 <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">My Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href={"/profile/orders"}>My order</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>wishlist</DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/profile/help">help</Link>
-                </DropdownMenuItem>
+                <Link href="/profile">
+                  <DropdownMenuItem asChild>
+                    <div>My Profile</div>
+                  </DropdownMenuItem>
+                </Link>
+                <Link href={"/profile/orders"}>
+                  <DropdownMenuItem>
+                    <div>My order</div>
+                  </DropdownMenuItem>
+                </Link>
+                {/* <DropdownMenuItem>wishlist</DropdownMenuItem> */}
+                <Link href="/profile/help">
+                  <DropdownMenuItem>
+                    <div> help</div>
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem onClick={logout}>logout</DropdownMenuItem>
               </DropdownMenuContent>
             )}

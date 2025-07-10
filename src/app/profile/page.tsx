@@ -10,17 +10,26 @@ import ProfileView from "./components/ProfileView";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-
+import Link from "next/link";
 export default function ProfilePage() {
   const [user, setUser] = useState<userResponseDto | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isloading, setIsLoading] = useState(true);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-
+  const { isAuthenticated, isLoading, initializeAuth } = useAuthStore();
+  useEffect(() => {
+    // Initialize auth state when component mounts (or earlier in root layout)
+    // Only call initializeAuth if you haven't done it in a higher-level component (e.g., Root Layout)
+    // If you call initializeAuth in a higher component (e.g. Layout.tsx), remove this line.
+    initializeAuth();
+  }, [initializeAuth]);
   useEffect(() => {
     const checkAuthAndLoadProfile = async () => {
+      if (isLoading) {
+        // <-- IMPORTANT: Wait for auth state to be determined
+        return;
+      }
       if (!isAuthenticated) {
         router.push("/login/request-otp");
         return;
@@ -29,6 +38,7 @@ export default function ProfilePage() {
       try {
         const currentUser = await getCurrentUser();
         if (!currentUser) {
+          useAuthStore.getState().logout();
           router.push("/login/request-otp");
           return;
         }
@@ -47,6 +57,7 @@ export default function ProfilePage() {
         }
       } catch (error) {
         console.error("Error loading profile:", error);
+        useAuthStore.getState().logout();
         router.push("/login/request-otp");
       } finally {
         setIsLoading(false);
@@ -54,7 +65,7 @@ export default function ProfilePage() {
     };
 
     checkAuthAndLoadProfile();
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, isLoading]);
 
   const handleProfileUpdate = async (updatedUser: userResponseDto) => {
     setUser(updatedUser);
@@ -71,6 +82,17 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
+    // <-- New loading check for auth status
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Authenticating...</span>
+        </div>
+      </div>
+    );
+  }
+  if (isloading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex items-center space-x-2">
@@ -154,15 +176,22 @@ export default function ProfilePage() {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  My Orders
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Link href={"/profile/orders"}>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start mb-2"
+                  >
+                    My Orders
+                  </Button>
+                </Link>
+                {/* <Button variant="outline" className="w-full justify-start">
                   Wishlist
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Help & Support
-                </Button>
+                </Button> */}
+                <Link href="/profile/help">
+                  <Button variant="outline" className="w-full justify-start">
+                    Help & Support
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 

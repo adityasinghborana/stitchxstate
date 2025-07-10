@@ -4,7 +4,7 @@ export interface RecentOrderSummary {
   id: string;
   customerName: string;
   totalAmount: number;
-  status: string; 
+  status: string;
   createdAt: Date;
 }
 export interface GrowthDataPoint {
@@ -12,23 +12,31 @@ export interface GrowthDataPoint {
   revenue: number;
   orders: number;
 }
+export interface userdetail {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  createdAt: Date;
+}
 
-export interface DashboardDto{
-    totalSales:number;
-    totalOrders:number;
-    totalPurchase:number;
-    averageOrderValue:number;
-    totalGrowth:{
-        revenueGrowth:string;
-        orderGrowth:string;
-    }
-    totalUsers:number;
-    stockAlerts:Pick<ProductVariationEntity,  'id' | 'stock' | 'createdAt'>[];
-    totalProducts:number;
-    totalcategories:number;
-    recentOrders: RecentOrderSummary[];
-    
-    topProducts: { id: string; name: string; totalRevenue: number }[];
-    orderStatusBreakdown: Record<string, number>;
-    growthHistory: GrowthDataPoint[];
+export interface DashboardDto {
+  totalSales: number;
+  totalOrders: number;
+  totalPurchase: number;
+  averageOrderValue: number;
+  totalGrowth: {
+    revenueGrowth: string;
+    orderGrowth: string;
+  };
+  totalUsers: number;
+  userDetail: userdetail[];
+  stockAlerts: Pick<ProductVariationEntity, "id" | "stock" | "createdAt">[];
+  totalProducts: number;
+  totalcategories: number;
+  recentOrders: RecentOrderSummary[];
+
+  topProducts: { id: string; name: string; totalRevenue: number }[];
+  orderStatusBreakdown: Record<string, number>;
+  growthHistory: GrowthDataPoint[];
 }

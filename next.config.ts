@@ -21,6 +21,13 @@ const nextConfig = {
         port: "",
         pathname: "/images/**", // This path matches your example URL: /images/I/
       },
+      {
+        // <-- Add this new pattern for Facebook
+        protocol: "https",
+        hostname: "www.facebook.com",
+        port: "",
+        pathname: "/tr/**", // Specifically for the Meta Pixel tracking image path
+      },
       // If you have other image domains, add them here following the same structure
     ],
   },

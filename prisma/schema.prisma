@@ -224,3 +224,15 @@ model HelpQuery {
 //   @@index([guestId])
 //   @@map("wishlists") // Table name in the database
 // }
+
+model Settings {
+  id                       Int      @id @default(autoincrement())
+  metaPixelId              String?
+  metaCapiToken            String?
+  googleTagManagerId       String?
+  isMetaPixelEnabled       Boolean  @default(false)
+  isGoogleAnalyticsEnabled Boolean  @default(false)
+  lastUpdated              DateTime @updatedAt
+
+  @@unique([id])
+}

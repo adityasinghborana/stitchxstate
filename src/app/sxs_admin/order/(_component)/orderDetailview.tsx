@@ -8,7 +8,6 @@ import { PrismaUserRepository } from "@/core/repositories/IUserRepository";
 import { CartRepository } from "@/core/repositories/ICartRepository";
 import { ProductRepository } from "@/core/repositories/IProductRepository";
 import toast from "react-hot-toast";
-
 interface OrderDetailViewProps {
   order: orderEntity;
 }

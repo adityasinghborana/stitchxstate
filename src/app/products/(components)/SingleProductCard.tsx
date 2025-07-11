@@ -110,13 +110,6 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
 
   useEffect(() => {
     if (product) {
-      const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-      if (!pixelId) {
-        console.warn(
-          "NEXT_PUBLIC_META_PIXEL_ID is not set. Meta Pixel 'ViewContent' event will not fire."
-        );
-        return;
-      }
       const viewContentEventId = generateUniqueEventId("view_content");
       // Determine the price to use for the ViewContent event
       const priceToUseForView =
@@ -143,17 +136,13 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               event_name: "ViewContent",
-              event_id: viewContentEventId, // Use the same ID for deduplication
-              // Include user PII if available and relevant for matching ViewContent
+              event_id: viewContentEventId,
               email: currentUser?.email,
               phone: currentUser?.phone,
               value: priceToUseForView,
               currency: "INR",
               content_ids: [product.id],
               content_type: "product",
-              // Optional: You could pass page details for context if your CAPI route accepts them
-              // page_title: document.title,
-              // page_url: window.location.href,
             }),
           });
           console.log("[Server-side CAPI] ViewContent event sent.");
@@ -161,8 +150,7 @@ const SingleProductCard: React.FC<SingleProductCardProps> = ({ product }) => {
           console.error("[Server-side CAPI] Failed to send ViewContent:", err);
         }
       };
-      // Only call if you explicitly want server-side ViewContent
-      // sendCapiViewContent(); // You can uncomment this line to enable server-side ViewContent
+      sendCapiViewContent();
     }
   }, [product, selectedVariation, pathname, currentUser]);
   const handleVariationChange = (variation: ProductVariationEntity) => {

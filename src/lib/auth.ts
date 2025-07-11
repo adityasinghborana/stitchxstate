@@ -1,9 +1,11 @@
 // This function is safe to use in client components
+const BASEURL =
+  process.env.NEXT_PUBLIC_API_BASE_URL_MAIN || "http://localhost:3000";
 export async function getCurrentUser() {
   try {
-    const res = await fetch('http://localhost:3000/api/users/me', {
-      method: 'GET',
-      credentials: 'include', 
+    const res = await fetch(`${BASEURL}/api/users/me`, {
+      method: "GET",
+      credentials: "include",
     });
 
     if (!res.ok) return null;
@@ -11,7 +13,7 @@ export async function getCurrentUser() {
     const data = await res.json();
     return data.user;
   } catch (err) {
-    console.error('Error fetching current user:', err);
+    console.error("Error fetching current user:", err);
     return null;
   }
 }

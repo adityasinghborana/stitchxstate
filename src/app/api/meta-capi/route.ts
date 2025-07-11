@@ -1,23 +1,9 @@
-// src/app/api/meta-capi/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import crypto from "crypto";
-
-const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID; // Use NEXT_PUBLIC for consistency if used on client
-const ACCESS_TOKEN = process.env.META_CAPI_TOKEN;
-
-// Basic validation for environment variables
-if (!PIXEL_ID) {
-  console.error("META_PIXEL_ID environment variable is not set.");
-  // Consider throwing an error or handling this more gracefully in production
-}
-if (!ACCESS_TOKEN) {
-  console.error("META_CAPI_TOKEN environment variable is not set.");
-  // Consider throwing an error or handling this more gracefully in production
-}
+import prisma from "@/lib/prisma"; // Import your Prisma client
 
 function sha256(data: string) {
-  // Normalize and hash data for PII
   return crypto
     .createHash("sha256")
     .update(data.trim().toLowerCase())
@@ -26,9 +12,31 @@ function sha256(data: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const dbSettings = await prisma.settings.findFirst();
+
+    const PIXEL_ID = dbSettings?.metaPixelId;
+    const ACCESS_TOKEN = dbSettings?.metaCapiToken;
+
+    // Basic validation for retrieved settings
+    if (!PIXEL_ID) {
+      console.error("Meta Pixel ID is not configured in database.");
+      return NextResponse.json(
+        { error: "Server configuration error: Meta Pixel ID missing." },
+        { status: 500 }
+      );
+    }
+    if (!ACCESS_TOKEN) {
+      console.error("Meta CAPI Token is not configured in database.");
+      return NextResponse.json(
+        { error: "Server configuration error: Meta CAPI Token missing." },
+        { status: 500 }
+      );
+    }
+
+    // 2. Parse the request body sent from the client
     const body = await req.json();
 
-    // Get cookies for _fbc and _fbp
+    // 3. Extract user data (cookies, IP, user agent) from the request headers
     const cookies = req.headers.get("cookie");
     const fbc = cookies
       ? cookies
@@ -43,11 +51,8 @@ export async function POST(req: NextRequest) {
           ?.split("=")[1]
       : null;
 
-    // Get IP address from the request
-    // req.ip is a Next.js specific property when deployed, local might be undefined
     const ipAddress = req.headers.get("x-forwarded-for");
 
-    // Construct user data object
     const userData: { [key: string]: string | string[] } = {};
 
     if (body.email) {
@@ -68,24 +73,25 @@ export async function POST(req: NextRequest) {
     if (req.headers.get("user-agent")) {
       userData.client_user_agent = req.headers.get("user-agent") as string;
     }
-    // For more PII (like first_name, last_name, city, state, zip),
-    // you would add them here and hash them if applicable.
-    // e.g., if (body.firstName) userData.fn = [sha256(body.firstName)];
+    // Add more PII fields here if collected and hashed (e.g., first_name, last_name, city, state, zip)
+    // if (body.firstName) userData.fn = [sha256(body.firstName)];
+    // if (body.lastName) userData.ln = [sha256(body.lastName)];
 
-    // Event data structure
+    // 4. Construct the event data object for Meta CAPI
     const eventData = {
-      event_name: body.event_name, // Should always be provided by the client (e.g., "AddToCart", "ViewContent", "Purchase")
-      event_time: Math.floor(Date.now() / 1000), // Unix timestamp
-      event_id: body.event_id, // Crucial for deduplication
-      action_source: "website",
-      user_data: userData,
+      event_name: body.event_name, // Event name from client
+      event_time: Math.floor(Date.now() / 1000),
+      event_id: body.event_id, // Crucial for deduplication with client-side pixel events
+      action_source: "website", // Source of the event
+      user_data: userData, // Hashed user data and browser IDs
       custom_data: {
         value: body.value,
-        currency: body.currency || "INR", // Make currency dynamic, default to INR
+        currency: body.currency || "INR",
         content_ids: body.content_ids,
-        content_type: body.content_type || "product", // Make content_type dynamic, default to "product"
-        // Add more custom_data as needed, e.g., num_items for Purchase events
+        content_type: body.content_type || "product",
+        // Add more custom_data as needed for specific events (e.g., num_items for Purchase)
         // num_items: body.num_items,
+        // order_id: body.order_id,
       },
       // You can also add context data if available (e.g., page_title, page_url)
       // context: {
@@ -96,22 +102,14 @@ export async function POST(req: NextRequest) {
       // },
     };
 
-    // Validate essential data before sending to Meta
-    if (!PIXEL_ID || !ACCESS_TOKEN) {
-      return NextResponse.json(
-        {
-          error:
-            "Server configuration error: Meta Pixel ID or Access Token missing.",
-        },
-        { status: 500 }
-      );
-    }
+    // 5. Validate essential data before sending to Meta
     if (
       !eventData.event_name ||
       !eventData.event_id ||
       !eventData.custom_data.value ||
       !eventData.custom_data.content_ids
     ) {
+      console.error("Missing essential event data in request body.");
       return NextResponse.json(
         {
           error:
@@ -121,6 +119,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 6. Send the event data to Meta's Conversion API
     const res = await axios.post(
       `https://graph.facebook.com/v19.0/${PIXEL_ID}/events?access_token=${ACCESS_TOKEN}`,
       { data: [eventData] } // Meta CAPI expects an array of event objects

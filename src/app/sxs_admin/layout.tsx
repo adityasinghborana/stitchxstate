@@ -230,6 +230,31 @@ export default function AdminLayout({
         </svg>
       ),
     },
+    {
+      label: "Google Tag Manager",
+      href: "/sxs_admin/GTM",
+      icon: (
+        // Users Icon (Inline SVG)
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 48 48"
+          fill="none"
+          className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200"
+        >
+          <rect
+            width="48"
+            height="48"
+            rx="8"
+            fill="currentColor"
+            opacity="0.1"
+          />
+          <path
+            fill="currentColor"
+            d="M24.01 6.02a3.5 3.5 0 0 0-2.47 1.02L9.42 19.14a3.5 3.5 0 0 0 0 4.94l7.1 7.1a3.5 3.5 0 0 0 4.94 0l12.12-12.12a3.5 3.5 0 0 0 0-4.94l-7.1-7.1a3.5 3.5 0 0 0-2.47-1.02Zm0 4.83 7.1 7.1-12.12 12.12-7.1-7.1L24.01 10.85ZM18.3 30.56l-3.54 3.54a3.5 3.5 0 1 0 4.95 4.95l3.53-3.54-4.94-4.95Z"
+          />
+        </svg>
+      ),
+    },
   ];
 
   useEffect(() => {

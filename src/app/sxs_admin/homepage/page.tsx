@@ -197,6 +197,8 @@ const HomePageAdminPage: React.FC = () => {
               alt: "Flex Banner 1",
               title: "Left Banner",
               subtitle: "Great Deals",
+              ctaText: "Explore me",
+              btnUrl: "www.stitchXstate.com",
             },
             image2: {
               id: uuidv4(),
@@ -204,6 +206,8 @@ const HomePageAdminPage: React.FC = () => {
               alt: "Flex Banner 2",
               title: "Right Banner",
               subtitle: "New Arrivals",
+              ctaText: "SHOP GIFT CARDS",
+              btnUrl: "www.stitchXstate.com",
             },
           };
           break;
@@ -214,6 +218,7 @@ const HomePageAdminPage: React.FC = () => {
             pretitle: "Featured",
             imageUrl: "https://placehold.co/1200x400?text=Promo+Grid+Banner",
             title: "Big Savings!",
+            btnUrl: "www.stitchXstate.com",
             subtitle: "Limited time offers",
             description: "Check out our top deals across various categories.",
             promoLeft: {
